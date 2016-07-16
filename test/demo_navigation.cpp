@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 	speed_t baudrate = B9600;
   p_termios option = (p_termios) malloc( sizeof( struct termios));
   fd = shake_hand( bridge, baudrate, option);
-	char* c="c";
+	char c[2] = "c";
 /******<\Termio>*******/
 
 	while (1) {
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 		else if (right_ratio > left_ratio && (right_ratio - left_ratio) > 0.3)
 		{
 			cout << "Turn left" << endl;
-			c[0]='l';
+			c[0] = 'l';
 			host_write( fd, c, 1);
 		}
 		else
