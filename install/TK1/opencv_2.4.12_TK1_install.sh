@@ -12,18 +12,20 @@ sudo apt-get update
 cd ~/Downloads
 wget https://github.com/Itseez/opencv/archive/2.4.12.zip
 unzip 2.4.12.zip
-mv -rf opencv-2.4.12 ~
+mv  opencv-2.4.12 ~
 cd ~/opencv-2.4.12
 mkdir release
 cd release
 cmake -D CMAKE_BUILD_TYPE=RELEASE \
-			-D CMAKE_INSTALL_PREFIX=/usr/opencv2.4.12 \
+      -D CMAKE_INSTALL_PREFIX=/usr/opencv2.4.12 \
       -D INSTALL_C_EXAMPLE=ON \
+      -DWITH_CUDA=ON -DCUDA_ARCH_BIN="3.2" -DCUDA_ARCH_PTX="" \
+      -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF \
       ..
 make -j4
 sudo make -j4 install
 
 #env config
 echo "# Use OpenCV and other custom-built libraries." >> ~/.bashrc
-echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/opencv2.4.12" >> ~/.bashrc
+echo "export LD_LIBRARY_PATH=/usr/opencv2.4.12:$LD_LIBRARY_PATH" >> ~/.bashrc
 source ~/.bashrc
