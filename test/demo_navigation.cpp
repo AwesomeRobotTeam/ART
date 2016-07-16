@@ -38,10 +38,15 @@ int main(int argc, char *argv[]) {
 	char c[2] = "c";
 /******<\Termio>*******/
 
+	int timer = 0;
 	while (1) {
 		int key = cv::waitKey(1);
 		if ((key & 0xFF) == 27) // 'Esc' key
+		{
+			c[0] = 's';
+			host_write( fd, c, 1);
 			break;
+		}
 
 		cv::Mat inputFrame;
 		myVideoCapture >> inputFrame;
@@ -49,6 +54,12 @@ int main(int argc, char *argv[]) {
 		cv::Mat edges;
 		Canny(inputFrame, edges, atoi(argv[1]), atoi(argv[2])); // 150 200
 		cv::imshow("Video Captured", edges);
+
+		timer++;
+		if (timer > 10) {
+			timer = 0;
+			continue;
+		}
 
 		int left_cnt = 0;
 		int right_cnt = 0;
@@ -65,20 +76,20 @@ int main(int argc, char *argv[]) {
 			int avg_pos = 0;
 			if (white_cnt > 0) {
 				avg_pos = white_pos / white_cnt;
-				left_cnt += avg_pos;
+				right_cnt += avg_pos;
 			}
-			right_cnt += edges.cols - avg_pos;
+			left_cnt += edges.cols - avg_pos;
 		}
 
 		float left_ratio = left_cnt / float(edges.rows * edges.cols);
 		float right_ratio = right_cnt / float(edges.rows * edges.cols);
-		if (left_ratio > right_ratio && (left_ratio - right_ratio) > 0.3)
+		if (left_ratio > right_ratio && (left_ratio - right_ratio) > 0.4)
 		{
 			cout << "Turn right" << endl;
 			c[0] = 'r';
 			host_write( fd, c, 1);
 		}
-		else if (right_ratio > left_ratio && (right_ratio - left_ratio) > 0.3)
+		else if (right_ratio > left_ratio && (right_ratio - left_ratio) > 0.4)
 		{
 			cout << "Turn left" << endl;
 			c[0] = 'l';
