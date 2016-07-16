@@ -1,8 +1,8 @@
 #  Configuration  #
 
-CC = gcc
+CC = g++
 CFLAGS =\
-  -g -Wall
+  -g -Wall -ansi -std=c++11
 LDFLAGS=\
 	-lopencv_core -lopencv_highgui -lopencv_imgproc
 
@@ -21,10 +21,13 @@ test1o:= test/arduino_termio_test.o
 test2 := robot_navigation_via_color_differentiation
 test2cpp:= test/navigation_test.cpp
 
+test3 := demo_navigation
+test3cpp:= test/demo_navigation.cpp
+
 RMOBJ :=\
-	$(EXEC) $(OBJS)\
 	$(ARDO) $(test1o) $(test1)\
-	$(test2) $(test2o)
+	$(test2) $(test2o) \
+	$(test3)
 
 .PHONY: all
 all: 
@@ -33,10 +36,13 @@ all:
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS) $(INC_PATH)
 
 $(test1): $(test1o) $(ARDO)
-	$(CC) $(CFLAGS) -o $@ $(test1o) $(ARDO)
+	$(CC) $(CFLAGS) -o $@ $(test1o) $(ARDO) 
 
 $(test2): $(test2cpp)
 	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH)
+
+$(test3): $(test3cpp) $(ARDO)
+	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH) $(ARDO)
 
 clean:
 	$(RM) -f $(RMOBJ)

@@ -18,7 +18,7 @@ int main( int argc, char* argv[])
   p_termios option = (p_termios) malloc( sizeof( struct termios));
   fd = shake_hand( bridge, baudrate, option);
 
-	int rdbyte;
+	//int rdbyte;
 
   char* ws = "Hello_Arduino";
   printf("I say Hello to u, strlen(ws) = %d\n", strlen(ws));
