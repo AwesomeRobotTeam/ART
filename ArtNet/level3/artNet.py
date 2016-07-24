@@ -63,12 +63,12 @@ if __name__ == '__main__':
         caffe.set_mode_gpu()
     else:
         caffe.set_mode_cpu()
-
+    warning_message = '\nuse -h to watch more description'
     # Load weights file
     if args.weight:
         weights = pwd + args.weight
     else:
-        print 'should define the path of trained weight file'
+        print 'should define the path of trained weight file' + warning_message
         sys.exit()
     print weights
     assert os.path.exists(weights)
@@ -80,14 +80,14 @@ if __name__ == '__main__':
         net = caffe.Net(net_definition, weights, caffe.TEST)
         net.blobs['data'].reshape(50, 3, 32, 32)
     else:
-        print 'should define the path of network definition protobuf'
+        print 'should define the path of network definition protobuf' + warning_message
     # Load labels file
     if args.label:
         label_file = pwd + args.label
         assert os.path.exists(label_file)
         labels = list(np.loadtxt(label_file, str, delimiter='\t'))
     else:
-        print 'should define the path of label file'
+        print 'should define the path of label file' + warning_message
     
     # load the mean ImageNet image (as distributed with Caffe) for subtraction
     if args.mean:
