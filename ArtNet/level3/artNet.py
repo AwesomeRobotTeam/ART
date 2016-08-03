@@ -6,6 +6,7 @@ import cv2
 import argparse
 import detection as dt
 import bridge 
+import crop
 
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
 pwd = os.popen("pwd").read().strip('\n') + '/'
@@ -80,7 +81,7 @@ if __name__ == '__main__':
         print net_definition
         assert os.path.exists(net_definition)
         net = caffe.Net(net_definition, weights, caffe.TEST)
-        net.blobs['data'].reshape(50, 3, 32, 32)
+        net.blobs['data'].reshape(100, 3, 32, 32)
     else:
         print 'should define the path of network definition protobuf'
     # Load labels file
@@ -109,6 +110,15 @@ if __name__ == '__main__':
             input_image = caffe.io.load_image(pwd + args.image + dirItemList[i])
             transformed_images.append(input_image)
         output = disp_preds(net, transformed_images, labels)
+        dt.print_catagory_table(output)
+        dt.print_probability_table(output)
+        coordinates = dt.get_coordinates(output)
+    else:
+        image = cv2.imread('cifar10.png')
+        cv2.imshow('img', image)
+        cv2.waitKey(0)
+        img_list = crop.get_crops(image, 10)
+        output = disp_preds(net, img_list, labels)
         dt.print_catagory_table(output)
         dt.print_probability_table(output)
         coordinates = dt.get_coordinates(output)
