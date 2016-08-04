@@ -28,15 +28,16 @@ def print_probability_table(item_list):
 def get_coordinate(index):
     return '%sb' % (index / row) + '%sb' % (index % col) + 'c'
 
-def get_coordinates(item_list, targetlist=['Cat','Trunk','Automobile']):
-    coordinates = list()
-    for i, item in enumerate(item_list):
+def get_coordinates(item_list, targetlist=['Cat','Trunk','Automobile'], num=10):
+    targets = list()
+    for item in item_list:
         if item['catagory'] in targetlist:
-            coordinates.append(get_coordinate(i))
-    coordinates = list(select_coordinates(coordinates))
-    print [coordinate for index, coordinate in enumerate(coordinates)]
+            targets.append(item)
+    targets = sorted(targets, key = lambda x : x['probability'], reverse=True)
+    coordinates = list(get_coordinate(target['index']) for target in targets[:num])
+    print [coordinate for coordinate in coordinates]
     return coordinates
-    
+
 def select_coordinates(candidates, num=10):
     if len(candidates) > num:
         return candidates[:num]

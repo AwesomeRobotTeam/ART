@@ -7,6 +7,7 @@ import argparse
 import detection as dt
 import bridge 
 import crop
+import time
 
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
 pwd = os.popen("pwd").read().strip('\n') + '/'
@@ -25,7 +26,7 @@ def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
         print 'top %d predicted %s labels =' % (k, name)
         print '\n'.join('\t(%d) %5.2f%% %s' % (i+1, 100*probs[p], labels[p])
                        for i, p in enumerate(top_k))
-        output_labels.insert(index, {'catagory':labels[probs.argmax()], 'probability':probs[probs.argmax()]})
+        output_labels.insert(index, {'catagory':labels[probs.argmax()], 'probability':probs[probs.argmax()], 'index':index})
         
     return  output_labels
 
@@ -118,7 +119,10 @@ if __name__ == '__main__':
         cv2.imshow('img', image)
         cv2.waitKey(0)
         img_list = crop.get_crops(image, 10)
+        tStart = time.time()
         output = disp_preds(net, img_list, labels)
+        tEnd = time.time()
+        print "It cost %f sec" % (tEnd - tStart)
         dt.print_catagory_table(output)
         dt.print_probability_table(output)
         coordinates = dt.get_coordinates(output)
