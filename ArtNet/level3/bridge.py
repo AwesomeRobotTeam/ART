@@ -1,7 +1,7 @@
 import serial
-
+import time
 # configure the serial connection
-def connect(port='/dev/ttyUSB1',baudrate=9600):
+def connect(port='/dev/ttyACM0',baudrate=9600):
     ser = serial.Serial(port, baudrate,
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_TWO,
@@ -12,7 +12,11 @@ def connect(port='/dev/ttyUSB1',baudrate=9600):
 
 # send message to laser gun
 def sendmsg(ser, message):
-    ser.write(message)
+    msg = ''.join(message)
+    ser.write(msg)
+    time.sleep(1)
+    msg = ser.read(len(msg))
+    print 'return : '+ msg
 
 # close connection
 def close(ser):
