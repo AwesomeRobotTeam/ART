@@ -62,7 +62,7 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--device", type=str, help="the device name")
     args = parser.parse_args()
    
-    if args.gpu: 
+    if args.gpu >= 0: 
         caffe.set_device(args.gpu)
         caffe.set_mode_gpu()
     else:
