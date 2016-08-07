@@ -62,7 +62,7 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--device", type=str, help="the device name")
     args = parser.parse_args()
    
-    if args.gpu: 
+    if args.gpu >= 0: 
         caffe.set_device(args.gpu)
         caffe.set_mode_gpu()
     else:
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     # Load weights file
     if args.weight:
-        weights = pwd + args.weight
+        weights = args.weight
     else:
         print 'should define the path of trained weight file'
         sys.exit()
@@ -78,16 +78,16 @@ if __name__ == '__main__':
     assert os.path.exists(weights)
     #load net definition
     if args.net:
-        net_definition = pwd + args.net
+        net_definition = args.net
         print net_definition
         assert os.path.exists(net_definition)
         net = caffe.Net(net_definition, weights, caffe.TEST)
-        net.blobs['data'].reshape(100, 3, 32, 32)
+        net.blobs['data'].reshape(256, 3, 32, 32)
     else:
         print 'should define the path of network definition protobuf'
     # Load labels file
     if args.label:
-        label_file = pwd + args.label
+        label_file = args.label
         assert os.path.exists(label_file)
         labels = list(np.loadtxt(label_file, str, delimiter='\t'))
     else:
@@ -106,7 +106,7 @@ if __name__ == '__main__':
         cap = cv2.VideoCapture(args.video)
         run_realtime_recognition(cap,transformer)   
     elif args.image:
-        dirItemList = os.listdir(pwd + args.image)
+        dirItemList = os.listdir(args.image)
         for i in range(len(dirItemList)):
             input_image = caffe.io.load_image(pwd + args.image + dirItemList[i])
             transformed_images.append(input_image)
@@ -115,10 +115,10 @@ if __name__ == '__main__':
         dt.print_probability_table(output)
         coordinates = dt.get_coordinates(output)
     else:
-        image = cv2.imread('cifar10.png')
+        image = cv2.imread('./collage.png')
         cv2.imshow('img', image)
         cv2.waitKey(0)
-        img_list = crop.get_crops(image, 10)
+        img_list = crop.get_crops(image, 16)
         tStart = time.time()
         output = disp_preds(net, img_list, labels)
         tEnd = time.time()
@@ -127,6 +127,6 @@ if __name__ == '__main__':
         dt.print_probability_table(output)
         coordinates = dt.get_coordinates(output)
     if args.device:
-        ser = bridge.connect()
+        ser = bridge.connect(args.device)
         bridge.sendmsg(ser, coordinates)
         bridge.close(ser)
