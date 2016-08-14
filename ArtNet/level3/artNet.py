@@ -1,8 +1,8 @@
+import cv2
 import sys
 import caffe
 import numpy as np
 import os
-import cv2
 import argparse
 import detection as dt
 import bridge 
@@ -36,7 +36,7 @@ def run_realtime_recognition(cap):
     patch = object()
     while(True):
         ret, frame = cap.read()
-        key = cv2.waitKey(1000) & 0xff
+        key = cv2.waitKey(1000) & 0xFF
         # Our operations on the frame come here
         if myFetcher.calibrate(frame, key):
            break
@@ -46,9 +46,11 @@ def run_realtime_recognition(cap):
         ret, frame = cap.read()
         patch = myFetcher.segment(frame)
         cv2.imshow('image',patch)
-        if cv2.waitKey(1) == 27:
+        if cv2.waitKey(1)  & 0xFF == 27:
             break
     #TODO padding
+    constant= cv2.copyMakeBorder(patch,10,10,10,10,cv2.BORDER_CONSTANT,value=[255,0,0])
+    cv2.imshow(constant)
     # Our operations on the frame come here
     img_list = crop.get_crops(patch, 16)
     return img_list
