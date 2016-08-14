@@ -1,13 +1,14 @@
+import cv2
 import sys
 import caffe
 import numpy as np
 import os
-import cv2
 import argparse
 import detection as dt
 import bridge 
 import crop
 import time
+import fetcher
 
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
 pwd = os.popen("pwd").read().strip('\n') + '/'
@@ -23,23 +24,36 @@ def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
     for index in range(len(images)):
         probs = output['prob'][index]
         top_k = (-probs).argsort()[:k]
-        print 'top %d predicted %s labels =' % (k, name)
+        '''print 'top %d predicted %s labels =' % (k, name)
         print '\n'.join('\t(%d) %5.2f%% %s' % (i+1, 100*probs[p], labels[p])
-                       for i, p in enumerate(top_k))
+                       for i, p in enumerate(top_k))'''
         output_labels.insert(index, {'catagory':labels[probs.argmax()], 'probability':probs[probs.argmax()], 'index':index})
         
     return  output_labels
 
-def run_realtime_recognition(cap, transformer):
-    while 1:
+def run_realtime_recognition(cap):
+    myFetcher = fetcher.Fetcher()
+    patch = object()
+    while(True):
         ret, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('frame',gray)
-        # Our operations on the frame come here 
-        disp_preds(net, frame, labels)    
-        # Display the resulting frame
-        if cv2.waitKey(2000) & 0xFF == ord('q'):
+        key = cv2.waitKey(1000) & 0xFF
+        # Our operations on the frame come here
+        if myFetcher.calibrate(frame, key):
+           break
+
+    while(True):
+		# Capture frame-by-frame
+        ret, frame = cap.read()
+        patch = myFetcher.segment(frame)
+        cv2.imshow('image',patch)
+        if cv2.waitKey(1)  & 0xFF == 27:
             break
+    #TODO padding
+    constant= cv2.copyMakeBorder(patch,10,10,10,10,cv2.BORDER_CONSTANT,value=[255,0,0])
+    cv2.imshow(constant)
+    # Our operations on the frame come here
+    img_list = crop.get_crops(patch, 16)
+    return img_list
 
 def get_transformer(mu):
     # create transformer for the input called 'data'
@@ -62,7 +76,7 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--device", type=str, help="the device name")
     args = parser.parse_args()
    
-    if args.gpu >= 0: 
+    if args.gpu: 
         caffe.set_device(args.gpu)
         caffe.set_mode_gpu()
     else:
@@ -101,31 +115,33 @@ if __name__ == '__main__':
     print 'mean-subtracted values:', zip('BGR', mu)
     transformer = get_transformer(mu)
     transformed_images = list()
-    
+
+    tStart = time.time()
     if args.video >= 0:
-        cap = cv2.VideoCapture(args.video)
-        run_realtime_recognition(cap,transformer)   
+        cap = cv2.VideoCapture(args.video)		
+        img_list = run_realtime_recognition(cap)
+        output = disp_preds(net, img_list, labels)
+        cap.release()
+        cv2.destroyAllWindows() 
     elif args.image:
         dirItemList = os.listdir(args.image)
         for i in range(len(dirItemList)):
             input_image = caffe.io.load_image(pwd + args.image + dirItemList[i])
             transformed_images.append(input_image)
         output = disp_preds(net, transformed_images, labels)
-        dt.print_catagory_table(output)
-        dt.print_probability_table(output)
-        coordinates = dt.get_coordinates(output)
     else:
         image = cv2.imread('./collage.png')
         cv2.imshow('img', image)
         cv2.waitKey(0)
         img_list = crop.get_crops(image, 16)
-        tStart = time.time()
         output = disp_preds(net, img_list, labels)
-        tEnd = time.time()
-        print "It cost %f sec" % (tEnd - tStart)
-        dt.print_catagory_table(output)
-        dt.print_probability_table(output)
-        coordinates = dt.get_coordinates(output)
+	tEnd = time.time()
+	print "It cost %f sec" % (tEnd - tStart)
+    
+	dt.print_catagory_table(output)
+    dt.print_probability_table(output)
+    coordinates = dt.get_coordinates(output)
+    
     if args.device:
         ser = bridge.connect(args.device)
         bridge.sendmsg(ser, coordinates)
