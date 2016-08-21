@@ -1,7 +1,7 @@
 import serial
 import time
 # configure the serial connection
-def connect(port='/dev/ttyACM0',baudrate=9600):
+def connect(port='/dev/ttyACM0',baudrate=115200):
     ser = serial.Serial(port, baudrate,
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_TWO,

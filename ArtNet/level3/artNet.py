@@ -6,9 +6,8 @@ import os
 import argparse
 import detection as dt
 import bridge 
-import crop
 import time
-import fetcher
+import ImageProcessor as imgp
 
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
 pwd = os.popen("pwd").read().strip('\n') + '/'
@@ -32,27 +31,12 @@ def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
     return  output_labels
 
 def run_realtime_recognition(cap):
-    myFetcher = fetcher.Fetcher()
-    patch = object()
-    while(True):
-        ret, frame = cap.read()
-        key = cv2.waitKey(1000) & 0xFF
-        # Our operations on the frame come here
-        if myFetcher.calibrate(frame, key):
-           break
-
-    while(True):
-		# Capture frame-by-frame
-        ret, frame = cap.read()
-        patch = myFetcher.segment(frame)
-        cv2.imshow('image',patch)
-        if cv2.waitKey(1)  & 0xFF == 27:
-            break
-    #TODO padding
-    constant= cv2.copyMakeBorder(patch,10,10,10,10,cv2.BORDER_CONSTANT,value=[255,0,0])
-    cv2.imshow(constant)
-    # Our operations on the frame come here
-    img_list = crop.get_crops(patch, 16)
+    patch = imgp.getPatch(cap)
+    #padding or resize
+    patch = imgp.convert(patch,'resize')
+    #get crops
+    img_list = imgp.getCrops(patch, 16)
+    cv2.imwrite('test.jpg', constant)
     return img_list
 
 def get_transformer(mu):
@@ -70,7 +54,7 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--image", type=str, help="image path")
     parser.add_argument("-gpu", "--gpu", type=int, help="use gpu to forwarding the classification")
     parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./cifar10_quick.prototxt')
-    parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./cifar10_quick_iter_4000.caffemodel')
+    parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./cifar10_quick_iter_20000.caffemodel')
     parser.add_argument("-l", "--label", type=str, help="the path of label file", default='./label.txt')
     parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='python/caffe/imagenet/ilsvrc_2012_mean.npy')
     parser.add_argument("-d", "--device", type=str, help="the device name")
@@ -132,16 +116,17 @@ if __name__ == '__main__':
     else:
         image = cv2.imread('./collage.png')
         cv2.imshow('img', image)
-        cv2.waitKey(0)
-        img_list = crop.get_crops(image, 16)
+        while cv2.waitKey(0) & 0xFF != ord('q'):
+            continue
+        img_list = imgp.getCrops(image, 16)
         output = disp_preds(net, img_list, labels)
 	tEnd = time.time()
-	print "It cost %f sec" % (tEnd - tStart)
+	print "It cost %f sec" % (tEnd - tStart) 
     
-	dt.print_catagory_table(output)
+    dt.print_catagory_table(output)
     dt.print_probability_table(output)
     coordinates = dt.get_coordinates(output)
-    
+
     if args.device:
         ser = bridge.connect(args.device)
         bridge.sendmsg(ser, coordinates)
