@@ -129,5 +129,7 @@ if __name__ == '__main__':
 
     if args.device:
         ser = bridge.connect(args.device)
-        bridge.sendmsg(ser, coordinates)
+        for coordinate in coordinates:
+            bridge.sendmsg(ser,coordinate) 
+        #bridge.sendmsg(ser, coordinates)
         bridge.close(ser)
