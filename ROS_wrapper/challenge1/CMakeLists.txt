@@ -30,5 +30,7 @@ rosbuild_genmsg()
 #target_link_libraries(example ${PROJECT_NAME})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-rosbuild_add_executable(firstdemo src/demo_navigation.cpp)
+rosbuild_add_executable( firstdemo src/demo_navigation.cpp)
 target_link_libraries(firstdemo opencv_core opencv_highgui opencv_imgproc opencv_videostab)
+
+rosbuild_add_executable(manual_arduino src/manual_arduino.cpp)

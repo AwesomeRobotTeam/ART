@@ -12,8 +12,7 @@
   <depend package="roscpp"/>
   <depend package="rospy"/>
   <depend package="sensor_msgs"/>
-  <depend package="cv_bridge"/>
-  <depend package="image_transport"/>
+  <depend package="rosserial_arduino"/>
 
 </package>
 
