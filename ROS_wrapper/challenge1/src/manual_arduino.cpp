@@ -2,8 +2,8 @@
 #include "std_msgs/UInt16.h"
 #include "rosserial_arduino/Adc.h"
 
-#include <unistd.h>
-#include <fcntl.h>
+#include <sys/unistd.h>
+#include <sys/fcntl.h>
 
 #define UP0 'd'
 #define DOWN0 'c'
@@ -17,11 +17,12 @@
 
 #define ngetc( c) ( read ( 0, ( c), 1))
 
-void key2ard( rosserial_arduino::Adc in);
-void inadc( rosserial_arduino::Adc adc, uint16_t a, uint16_t b, uint16_t c , uint16_t d);
+void key2ard( rosserial_arduino::Adc &in);
+void inadc( rosserial_arduino::Adc &adc, uint16_t a, uint16_t b, uint16_t c , uint16_t d);
 
 int main( int argc, char** argv)
 {
+	fcntl( 0, F_SETFL, O_NONBLOCK);/*///< make the stdin be nonblocking*/
 	r_init( manual_ard);
 	r_hdlr( hdl);
 
@@ -30,8 +31,6 @@ int main( int argc, char** argv)
 	ros::Rate loop_rate( 10);
 
 	rosserial_arduino::Adc tmp;
-
-	fcntl( 0, F_SETFL, O_NONBLOCK);///< make the stdin be nonblocking
 
 	while( ros::ok())
 	{
@@ -43,14 +42,16 @@ int main( int argc, char** argv)
 	}
 }
 
-void key2ard( rosserial_arduino::Adc in)
+void key2ard( rosserial_arduino::Adc &in)
 {
-	char* key;
+	char* key = ( char*) malloc( sizeof( char) );
+	memset( key, '\0', 1);
 	
 	if( 0 == ngetc( key) || *key == '\n'){
 		ROS_INFO("Noting in keyborad");
 		return;
 	}
+
 	
 	ROS_INFO("key = %c", *key);
 
@@ -65,7 +66,7 @@ void key2ard( rosserial_arduino::Adc in)
 			inadc( in, 0, 100, 0, 100);
 			break;
 		case( DOWN1):
-			inadc( in, 0, 100, 0, 100);
+			inadc( in, 0, 200, 0, 200);
 			break;
 		case( LEFT0):
 			inadc( in, 0, 0, 120, 0);
@@ -86,7 +87,7 @@ void key2ard( rosserial_arduino::Adc in)
 	}
 }
 
-void inadc( rosserial_arduino::Adc adc, uint16_t a, uint16_t b, uint16_t c , uint16_t d)
+void inadc( rosserial_arduino::Adc &adc, uint16_t a, uint16_t b, uint16_t c , uint16_t d)
 {
 	adc.adc0 = a;// right forward
 	adc.adc1 = b;// right behind

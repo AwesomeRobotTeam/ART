@@ -3,8 +3,8 @@
 
 #define leftwheel0 5
 #define leftwheel1 6
-#define rightwheel0 9
-#define rightwheel1 10
+#define rightwheel0 10
+#define rightwheel1 11
 
 ros::NodeHandle  nh;
 
