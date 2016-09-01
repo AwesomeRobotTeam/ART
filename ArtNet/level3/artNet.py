@@ -12,15 +12,16 @@ import ImageProcessor as imgp
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
 pwd = os.popen("pwd").read().strip('\n') + '/'
 sys.path.insert(0, caffe_root + 'python')
+batch_size = 256
 
 def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
     input_blob = net.blobs['data']
-    for index, image in enumerate(images):
-        transformed_image = transformer.preprocess('data', image)
+    for index in range(batch_size):
+        transformed_image = transformer.preprocess('data', images[index])
         net.blobs['data'].data[index] = transformed_image
     output_labels = list()
     output = net.forward()
-    for index in range(len(images)):
+    for index in range(batch_size):
         probs = output['prob'][index]
         top_k = (-probs).argsort()[:k]
         '''print 'top %d predicted %s labels =' % (k, name)
@@ -45,7 +46,7 @@ def get_transformer(mu):
     transformer.set_transpose('data', (2,0,1))  # move image channels to outermost dimension
     transformer.set_mean('data', mu)            # subtract the dataset-mean value in each channel
     transformer.set_raw_scale('data', 255)      # rescale from [0, 1] to [0, 255]
-    transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
+    #transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
     return transformer
 
 if __name__ == '__main__':
@@ -54,13 +55,13 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--image", type=str, help="image path")
     parser.add_argument("-gpu", "--gpu", type=int, help="use gpu to forwarding the classification")
     parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./cifar10_quick.prototxt')
-    parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./cifar10_quick_iter_20000.caffemodel')
+    parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./cifar10_quick_iter_4000.caffemodel')
     parser.add_argument("-l", "--label", type=str, help="the path of label file", default='./label.txt')
-    parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='python/caffe/imagenet/ilsvrc_2012_mean.npy')
+    parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='./mean.npy')
     parser.add_argument("-d", "--device", type=str, help="the device name")
     args = parser.parse_args()
    
-    if args.gpu: 
+    if args.gpu >= 0: 
         caffe.set_device(args.gpu)
         caffe.set_mode_gpu()
     else:
@@ -80,7 +81,7 @@ if __name__ == '__main__':
         print net_definition
         assert os.path.exists(net_definition)
         net = caffe.Net(net_definition, weights, caffe.TEST)
-        net.blobs['data'].reshape(256, 3, 32, 32)
+        net.blobs['data'].reshape(batch_size, 3, 32, 32)
     else:
         print 'should define the path of network definition protobuf'
     # Load labels file
@@ -93,14 +94,15 @@ if __name__ == '__main__':
     
     # load the mean ImageNet image (as distributed with Caffe) for subtraction
     if args.mean:
-        assert os.path.exists(caffe_root + args.mean)
-    mu = np.load(caffe_root + args.mean)
+        assert os.path.exists(args.mean)
+    mu = np.load(args.mean)
     mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
     print 'mean-subtracted values:', zip('BGR', mu)
     transformer = get_transformer(mu)
     transformed_images = list()
 
     tStart = time.time()
+    # select input source: video, image directory or a picture
     if args.video >= 0:
         cap = cv2.VideoCapture(args.video)		
         img_list = run_realtime_recognition(cap)
@@ -121,15 +123,19 @@ if __name__ == '__main__':
         img_list = imgp.getCrops(image, 16)
         output = disp_preds(net, img_list, labels)
 	tEnd = time.time()
+    # show the forwarding time
 	print "It cost %f sec" % (tEnd - tStart) 
     
+    # show the output tables
     dt.print_catagory_table(output)
     dt.print_probability_table(output)
+
+    # get targets coordinates 
     coordinates = dt.get_coordinates(output)
 
+    # send the message to laser fort via serial transmission
     if args.device:
         ser = bridge.connect(args.device)
         for coordinate in coordinates:
             bridge.sendmsg(ser,coordinate) 
-        #bridge.sendmsg(ser, coordinates)
         bridge.close(ser)
