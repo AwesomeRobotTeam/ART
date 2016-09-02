@@ -34,3 +34,4 @@ rosbuild_add_executable( firstdemo src/demo_navigation.cpp)
 target_link_libraries(firstdemo opencv_core opencv_highgui opencv_imgproc opencv_videostab)
 
 rosbuild_add_executable(manual_arduino src/manual_arduino.cpp)
+rosbuild_add_executable(center_node src/main.cpp)
