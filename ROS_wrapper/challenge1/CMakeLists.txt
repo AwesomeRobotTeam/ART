@@ -35,3 +35,6 @@ target_link_libraries(firstdemo opencv_core opencv_highgui opencv_imgproc opencv
 
 rosbuild_add_executable(manual_arduino src/manual_arduino.cpp)
 rosbuild_add_executable(center_node src/main.cpp)
+
+rosbuild_add_executable( detectTraffic src/traffic_light_test.cpp)
+target_link_libraries(detectTraffic opencv_core opencv_highgui opencv_imgproc opencv_videostab)
