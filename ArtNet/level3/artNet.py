@@ -23,10 +23,6 @@ def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
     output = net.forward()
     for index in range(batch_size):
         probs = output['prob'][index]
-        top_k = (-probs).argsort()[:k]
-        '''print 'top %d predicted %s labels =' % (k, name)
-        print '\n'.join('\t(%d) %5.2f%% %s' % (i+1, 100*probs[p], labels[p])
-                       for i, p in enumerate(top_k))'''
         output_labels.insert(index, {'catagory':labels[probs.argmax()], 'probability':probs[probs.argmax()], 'index':index})
         
     return  output_labels
@@ -60,7 +56,8 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='./mean.npy')
     parser.add_argument("-d", "--device", type=str, help="the device name")
     args = parser.parse_args()
-   
+  
+    # select computing device
     if args.gpu >= 0: 
         caffe.set_device(args.gpu)
         caffe.set_mode_gpu()
@@ -75,7 +72,8 @@ if __name__ == '__main__':
         sys.exit()
     print weights
     assert os.path.exists(weights)
-    #load net definition
+
+    # load net definition
     if args.net:
         net_definition = args.net
         print net_definition
@@ -84,6 +82,7 @@ if __name__ == '__main__':
         net.blobs['data'].reshape(batch_size, 3, 32, 32)
     else:
         print 'should define the path of network definition protobuf'
+
     # Load labels file
     if args.label:
         label_file = args.label
