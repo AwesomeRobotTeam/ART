@@ -1,6 +1,9 @@
 /*
  * By Guan-Wen Lin
  * Last modified: Sep 2, 2016.
+ *
+ * ROS wrap by Yen-Kuan Wu
+ * Last modified: Sep 2, 2016.
  */
 #include <iostream>
 #include <vector>
@@ -11,6 +14,13 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+/*ROS*/
+#include "ros_api.h"
+#include "challenge1/trafficLight.h"
+
+#define GREEN 0
+#define RED		1
+/**/
 cv::Mat extractRedHue(cv::Mat inputFrame_BGR) {
 	// Convert input image to HSV
 	cv::Mat inputFrame_HSV;
@@ -83,6 +93,16 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
+	/*ROS*/
+	r_init( Camera_for_Traffic_Light);
+	r_hdlr( hdl);
+
+	r_newPub( campub, hdl, challenge1::trafficLight, traf_color, 100);
+	challenge1::trafficLight traf;
+
+	ros::Rate loop_rate( 10);
+	/**/
+
 
 	// Start to detect the red traffic light
 	cv::VideoCapture myVideoCapture(DEVICE);
@@ -97,7 +117,7 @@ int main(int argc, char *argv[]) {
 	bool hasDetectedRedHue = false;
 	time_t start;
 	cv::Point prevCenter(-1, -1);
-	while (1) {
+	while ( ros::ok()) {
 		int key = cv::waitKey(1);
 		if ((key & 0xFF) == 27) // 'Esc' key
 			return 0;
@@ -110,26 +130,44 @@ int main(int argc, char *argv[]) {
 		if (findBiggestRedHue(redHueImg, THRESHOLD_RED, curCenter)) {
 			// A new incoming red object is detected
 			if (!hasDetectedRedHue && cv::norm(curCenter - prevCenter) > THRESHOLD_DISTANCE) {
-				std::cout << "Wait" << std::endl;
+				//std::cout << "Wait" << std::endl;
+				/*ROS*/
+				traf.color = RED;
+				/**/
 				hasDetectedRedHue = true;
 				prevCenter = curCenter;
 				start = clock();
 			}
 			// If we wait too long, the red object is not the red traffic light
 			else if (((clock() - start) / (double)CLOCKS_PER_SEC) > LATENCY) {
-				std::cout << "Go" << std::endl;
+				//std::cout << "Go" << std::endl;
+				/*ROS*/
+				traf.color = GREEN;
+				/**/
 				hasDetectedRedHue = false;
 				prevCenter = curCenter;
 			}
 			// The red object is being detected
 			else
-				std::cout << "Wait" << std::endl;
+				//std::cout << "Wait" << std::endl;
+				/*ROS*/
+				traf.color = RED;
+				/**/
 		}
 		else
-			std::cout << "Go" << std::endl;
+			//std::cout << "Go" << std::endl;
+			/*ROS*/
+			traf.color = GREEN;
+			/**/
 
 		cv::imshow("Video Captured", inputFrame_BGR);
 		cv::imshow("Red Hue", redHueImg);
+
+		/*ROS*/
+		campub.publish( traf);
+		ros::spinOnce();
+		loop_rate.sleep();
+		/**/
 	}
 
 	return 0;
