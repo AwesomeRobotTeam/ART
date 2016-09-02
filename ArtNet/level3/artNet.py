@@ -46,7 +46,7 @@ def get_transformer(mu):
     transformer.set_transpose('data', (2,0,1))  # move image channels to outermost dimension
     transformer.set_mean('data', mu)            # subtract the dataset-mean value in each channel
     transformer.set_raw_scale('data', 255)      # rescale from [0, 1] to [0, 255]
-    #transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
+    transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
     return transformer
 
 if __name__ == '__main__':
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # show the output tables
     dt.print_catagory_table(output)
     dt.print_probability_table(output)
-
+    
     # get targets coordinates 
     coordinates = dt.get_coordinates(output)
 
