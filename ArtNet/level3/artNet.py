@@ -109,7 +109,7 @@ if __name__ == '__main__':
         cap.release()
         cv2.destroyAllWindows() 
     elif args.image:
-        dirItemList = os.listdir(args.image)
+        dirItemList = sorted(os.listdir(args.image))
         for i in range(len(dirItemList)):
             input_image = caffe.io.load_image(pwd + args.image + dirItemList[i])
             transformed_images.append(input_image)
@@ -120,8 +120,10 @@ if __name__ == '__main__':
         while cv2.waitKey(0) & 0xFF != ord('q'):
             continue
         img_list = imgp.getCrops(image, 16)
+        for i in range(len(img_list)):
+            cv2.imshow('img',img_list[i])
         output = disp_preds(net, img_list, labels)
-	tEnd = time.time()
+    tEnd = time.time()
     # show the forwarding time
 	print "It cost %f sec" % (tEnd - tStart) 
     
