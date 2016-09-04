@@ -1,12 +1,18 @@
+from termcolor import colored
+
 row = 16
 col = 16
-def print_catagory_table(item_list):
+
+def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
     print "Catagory table"
     k = 0
     for i in range(row):
         for j in range(col):
             if (i*col + j) < len(item_list):
-                print ("|%6.6s" % item_list[k]['catagory']) ,
+                if item_list[k]['catagory'] in targetlist:
+                    print colored("|%6.6s" % item_list[k]['catagory'], 'red') ,
+                else:
+                    print ("|%6.6s" % item_list[k]['catagory']) ,
             else:
                 print ("|%6.6s" % 'x') ,
             k = k + 1
@@ -28,7 +34,7 @@ def print_probability_table(item_list):
 def get_coordinate(index):
     return '%sb' % (index / row) + '%sb' % (index % col) + 'c'
 
-def get_coordinates(item_list, targetlist=['Cat','Trunk','Automobile'], num=10):
+def get_coordinates(item_list, targetlist=['cat','truck','automobile'], num=10):
     targets = list()
     for item in item_list:
         if item['catagory'] in targetlist:

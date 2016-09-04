@@ -43,13 +43,20 @@ def getSquare(patch, method):
         length = min(heigth, width)
         return cv2.resize(patch, (length,length))
 
+def get2digits(num):
+    if num <= 9:
+        return '0'+str(num)
+    else:
+        return str(num)
+
 def getCrops(img, num=16):
     crop_imgs = list()
     height, width, depth = img.shape
     crop_height = height / num
-    crop_width = width / num 
+    crop_width = width / num
     for i in range(num):
         for j in range(num):
             crop_img = img[i*crop_height : ((i+1) * crop_height) , j * crop_width: ((j+1) * crop_width), :]
+            cv2.imwrite('Collage/test/crops/img'+get2digits(i)+get2digits(j)+'.jpg', crop_img)
             crop_imgs.append(crop_img)
     return crop_imgs       
