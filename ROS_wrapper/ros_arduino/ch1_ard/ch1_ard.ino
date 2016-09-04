@@ -16,6 +16,11 @@
 #define echo_C 5
 #define trig_L 6
 #define echo_L 7
+//#define trig_RC 12
+//#define echo_RC 13
+//#define trig_LC 14
+//#define echo_LC 15
+
 
 //IR_trigger
 #define IR_trig_R 52
@@ -93,12 +98,12 @@ void setup()
 
 void loop()
 {
-  wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L));
-  pubUtrasonic.publish( &usonic);
+  //wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L));
+  //pubUtrasonic.publish( &usonic);
 
-  wrtIR_trig( ir_trig, digitalRead( IR_trig_C), digitalRead( IR_trig_R), digitalRead( IR_trig_L));
-  pubIR_trigger.publish( &ir_trig);
+  //wrtIR_trig( ir_trig, digitalRead( IR_trig_C), digitalRead( IR_trig_R), digitalRead( IR_trig_L));
+  //pubIR_trigger.publish( &ir_trig);
 
   nh.spinOnce();
-  delay(100);
+  //delay(100);
 }
