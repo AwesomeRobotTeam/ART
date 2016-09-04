@@ -47,10 +47,7 @@ void writeMotor( const challenge1::Motor &msg){
 
 int ir2trig( int ir_in)
 {
-  if( ir_in == 0)
-    return 1;
-  else( ir_in == 1)
-    return 0;
+  return ir_in == 0? 1: 0;
 }
 
 void wrtUsonic( challenge1::Ultrasonic &msg, float f, float h, float r, float l)
