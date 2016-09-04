@@ -24,7 +24,7 @@ def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
     for index in range(batch_size):
         probs = output['prob'][index]
         output_labels.insert(index, {'catagory':labels[probs.argmax()], 'probability':probs[probs.argmax()], 'index':index})
-        
+
     return  output_labels
 
 def run_realtime_recognition(cap):
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='./mean.npy')
     parser.add_argument("-d", "--device", type=str, help="the device name")
     args = parser.parse_args()
-  
+
     # select computing device
     if args.gpu >= 0: 
         caffe.set_device(args.gpu)
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         labels = list(np.loadtxt(label_file, str, delimiter='\t'))
     else:
         print 'should define the path of label file'
-    
+
     # load the mean ImageNet image (as distributed with Caffe) for subtraction
     if args.mean:
         assert os.path.exists(args.mean)
@@ -120,17 +120,15 @@ if __name__ == '__main__':
         while cv2.waitKey(0) & 0xFF != ord('q'):
             continue
         img_list = imgp.getCrops(image, 16)
-        for i in range(len(img_list)):
-            cv2.imshow('img',img_list[i])
         output = disp_preds(net, img_list, labels)
     tEnd = time.time()
     # show the forwarding time
-	print "It cost %f sec" % (tEnd - tStart) 
-    
+    print "It cost %f sec" % (tEnd - tStart) 
+
     # show the output tables
     dt.print_catagory_table(output)
     dt.print_probability_table(output)
-    
+
     # get targets coordinates 
     coordinates = dt.get_coordinates(output)
 
