@@ -45,6 +45,11 @@ void writeMotor( const challenge1::Motor &msg){
   analogWrite( rightwheel1, msg.r_aclk);
 }
 
+int ir2trig( int ir_in)
+{
+  return ir_in == 0? 1: 0;
+}
+
 void wrtUsonic( challenge1::Ultrasonic &msg, float f, float h, float r, float l)
 {
    msg.f_dst = f;
@@ -68,7 +73,7 @@ challenge1::Ultrasonic usonic;
 ros::Publisher pubUtrasonic("Arduino_Ultrasonic", &usonic);
 
 challenge1::IR_trigger ir_trig;
-ros::Publisher pubIR_trigger("Arduino_IR_trigger_", &ir_trig);
+ros::Publisher pubIR_trigger("Arduino_IR_trigger", &ir_trig);
 
 void setup()
 {
@@ -101,8 +106,8 @@ void loop()
   //wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L));
   //pubUtrasonic.publish( &usonic);
 
-  //wrtIR_trig( ir_trig, digitalRead( IR_trig_C), digitalRead( IR_trig_R), digitalRead( IR_trig_L));
-  //pubIR_trigger.publish( &ir_trig);
+  wrtIR_trig( ir_trig, ir2trig( digitalRead( IR_trig_C)), ir2trig( digitalRead( IR_trig_R)), ir2trig( digitalRead( IR_trig_L)));
+  pubIR_trigger.publish( &ir_trig);
 
   nh.spinOnce();
   //delay(100);
