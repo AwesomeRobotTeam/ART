@@ -16,10 +16,10 @@
 #define echo_C 5
 #define trig_L 6
 #define echo_L 7
-//#define trig_RC 12
-//#define echo_RC 13
-//#define trig_LC 14
-//#define echo_LC 15
+#define trig_RC 12
+#define echo_RC 13
+#define trig_LC 14
+#define echo_LC 15
 
 
 //IR_trigger
@@ -50,12 +50,14 @@ int ir2trig( int ir_in)
   return ir_in == 0? 1: 0;
 }
 
-void wrtUsonic( challenge1::Ultrasonic &msg, float f, float h, float r, float l)
+void wrtUsonic( challenge1::Ultrasonic &msg, float f, float h, float r, float l, float rf, float lf)
 {
    msg.f_dst = f;
    msg.h_dst = h;
    msg.r_dst = r;
    msg.l_dst = l;
+   msg.rf_dst = rf;
+   msg.lf_dst = lf;
 }
 
 void wrtIR_trig( challenge1::IR_trigger &msg , int c, int r, int l)
@@ -85,8 +87,12 @@ void setup()
   //Ultrasonic
   pinMode(trig_R, OUTPUT);
   pinMode(echo_R, INPUT);
+  pinMode(trig_RC, OUTPUT);
+  pinMode(echo_RC, INPUT);
   pinMode(trig_C, OUTPUT);
   pinMode(echo_C, INPUT);
+  pinMode(trig_LC, OUTPUT);
+  pinMode(echo_LC, INPUT);
   pinMode(trig_L, OUTPUT);
   pinMode(echo_L, INPUT);
   //IR_Tracker

@@ -7,14 +7,14 @@
 
 ///< ROS init Topic msg
 challenge1::Motor mot;
-challenge1::Ultrasonic usonic;
 challenge1::IR_trigger irt;
+challenge1::trafficLight traf;
+challenge1::Ultrasonic usonic;
 
 ///< Subscribe Call Back funct
-void trafColor( const challenge1::trafficLight::ConstPtr &msg);
-
-//void avoidance( const challenge1::Ultrasonic::ConstPtr &msg);
 void btracker( const challenge1::IR_trigger::ConstPtr &msg);
+void trafColor( const challenge1::trafficLight::ConstPtr &msg);
+void avoidance( const challenge1::Ultrasonic::ConstPtr &msg);
 
 int main( int argc, char** argv)
 {
@@ -23,15 +23,16 @@ int main( int argc, char** argv)
 	r_hdlr( hdl);
 	ros::Rate loop_rate( 10);
 
-	///< Publisher and Subscriber
+	///< Publisher
 	r_newPub( motpub, hdl, challenge1::Motor, Arduino_Motor, 1000);
 	
-	r_newSub( trafsub, hdl, traf_color, 1000, trafColor);
-	//r_newSub( irtsub, hdl, Arduino_Ultrasonic, 1000, avoidance);
+	///< Subscriber
 	r_newSub( irtsub, hdl, Arduino_IR_trigger, 1000, btracker);
+	r_newSub( trafsub, hdl, traf_color, 1000, trafColor);
+	r_newSub( usonicsub, hdl, Arduino_Ultrasonic, 1000, avoidance);
 
 	///< Msg init
-	challenge1::trafficLight traf;
+	//challenge1::trafficLight traf;
 	traf.color = 0;
 
 	///< while loop
@@ -79,4 +80,18 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 	else
 		ROS_ERROR("Bug for black tracker: trig_c %d , trig_r %d, trig_l %d",
 			( int) msg->trig_l, ( int) msg->trig_c, ( int) msg->trig_r);
+}
+
+void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)
+{
+	if( ( int) msg->r_dst < 20)
+		optMotor( mot, front1);
+	else if( ( int) msg->l_dst < 20)
+		optMotor( mot, front1);
+	else if( ( int) msg->f_dst < 10)
+		optMotor( mot, stop);
+	else if( ( int) msg->rf_dst < 15)
+		optMotor( mot, stop);
+	else if( ( int) msg->rf_dst < 15)
+		optMotor( mot, stop);
 }
