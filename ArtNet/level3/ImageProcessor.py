@@ -1,36 +1,38 @@
 import cv2
 import fetcher
 import signal
+import os
+import caffe
 
-global key
-global patch
-key = 1
-def handler(signal, frame):
-    global key
-    key = 27
-signal.signal(signal.SIGTSTP, handler)
-myFetcher = fetcher.Fetcher()
+class Image_Fetcher:
+    def __init__(self, cap, key=1):
+        self.cap = cap
+        self.key = key
+        self.patch = None
+        self.myFetcher = fetcher.Fetcher()
+        signal.signal(signal.SIGTSTP, self.handler)
 
-def getFetcher(cap):
-    global key
-    global patch    
-    while(True):
-        # Capture frame-by-frame
-        ret, frame = cap.read()
-        cv2.waitKey(1)
-        print key
-        if myFetcher.calibrate(frame, key):
-            break
-    key = 1
-    while(True):
-        # Capture frame-by-frame
-        ret, frame = cap.read() 
-        cv2.waitKey(1)
-        if key == 27:
-            break
-        patch = myFetcher.segment(frame) 
-    cv2.destroyAllWindows()
-    return patch
+    def handler(self, signal, frame):
+        self.key = 27
+
+    def getPatch(self):
+        while(True):
+            # Capture frame-by-frame
+            ret, frame = self.cap.read()
+            cv2.waitKey(1)
+            #print self.key
+            if self.myFetcher.calibrate(frame, self.key):
+                break
+        self.key = 1
+        while(True):
+            # Capture frame-by-frame
+            ret, frame = self.cap.read() 
+            cv2.waitKey(1)
+            if self.key == 27:
+                break
+            self.patch = self.myFetcher.segment(frame) 
+        cv2.destroyAllWindows()
+        return patch
 
 def getSquare(patch, method):
     height, width, depth = patch.shape
@@ -58,5 +60,8 @@ def getCrops(img, num=16):
         for j in range(num):
             crop_img = img[i*crop_height : ((i+1) * crop_height) , j * crop_width: ((j+1) * crop_width), :]
             cv2.imwrite('Collage/test/crops/img'+get2digits(i)+get2digits(j)+'.jpg', crop_img)
-            crop_imgs.append(crop_img)
+    dirItemList = sorted(os.listdir('Collage/test/crops/'))
+    for i in range(len(dirItemList)):
+        input_image = caffe.io.load_image('Collage/test/crops/' + dirItemList[i])
+        crop_imgs.append(input_image)
     return crop_imgs       
