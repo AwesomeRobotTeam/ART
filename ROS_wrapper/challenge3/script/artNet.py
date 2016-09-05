@@ -9,6 +9,15 @@ import bridge
 import time
 import ImageProcessor as imgp
 
+###ROS###
+import rospy
+from challenge3.msg import Stepper
+
+#init
+rospy.init_node( 'Center_Node')
+pubStepper = rospy.Publisher( 'Arduino_Stepper', Stepper)
+#########
+
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
 pwd = os.popen("pwd").read().strip('\n') + '/'
 sys.path.insert(0, caffe_root + 'python')
@@ -139,3 +148,12 @@ if __name__ == '__main__':
         for coordinate in coordinates:
             bridge.sendmsg(ser,coordinate) 
         bridge.close(ser)
+
+		#example:
+		# Make the Stepper Motor1 turn +10 steps and Stepper Motor2 turn -10 steps
+		#Code:
+		#	try:
+		#		while not rospy.is_shutdown():
+		#			pubStepper( stp1 = 10, stp2 = -10)
+		#			rospy.sleep( 1.0)
+		#		except rospy.ROSInterruptException: pass
