@@ -27,5 +27,5 @@ sudo make -j4 install
 
 #env config
 echo "# Use OpenCV and other custom-built libraries." >> ~/.bashrc
-echo "export LD_LIBRARY_PATH=/usr/opencv2.4.12:$LD_LIBRARY_PATH" >> ~/.bashrc
+echo "export LD_LIBRARY_PATH=/usr/opencv2.4.12/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
 source ~/.bashrc
