@@ -28,7 +28,8 @@ def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
     return  output_labels
 
 def run_realtime_recognition(cap):
-    patch = imgp.getPatch(cap)
+    image_fetcher = imgp.Image_Fetcher(cap)
+    patch = image_fetcher.getPatch()
     #padding or resize
     patch = imgp.convert(patch,'resize')
     #get crops
@@ -50,8 +51,8 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--video", type=int, help="set video source", default=-1)
     parser.add_argument("-i", "--image", type=str, help="image path")
     parser.add_argument("-gpu", "--gpu", type=int, help="use gpu to forwarding the classification")
-    parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./cifar10_quick.prototxt')
-    parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./cifar10_quick_iter_4000.caffemodel')
+    parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./cifar10_predict.prototxt')
+    parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./cifar10_predict.caffemodel')
     parser.add_argument("-l", "--label", type=str, help="the path of label file", default='./label.txt')
     parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='./mean.npy')
     parser.add_argument("-d", "--device", type=str, help="the device name")
