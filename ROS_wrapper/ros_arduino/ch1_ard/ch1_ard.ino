@@ -4,28 +4,28 @@
 #include <challenge1/IR_trigger.h>
 
 //Motor
-#define leftwheel0 8
-#define leftwheel1 9
-#define rightwheel0 10
-#define rightwheel1 11
+#define leftwheel0 10
+#define leftwheel1 11
+#define rightwheel0 8
+#define rightwheel1 9
 
 //Ultrasonic
-#define trig_R 2
-#define echo_R 3
-#define trig_C 4
-#define echo_C 5
-#define trig_L 6
-#define echo_L 7
-#define trig_RC 12
-#define echo_RC 13
-#define trig_LC 14
-#define echo_LC 15
+#define trig_R 28
+#define echo_R 29
+#define trig_C 32
+#define echo_C 33
+#define trig_L 36
+#define echo_L 37
+#define trig_RC 22
+#define echo_RC 23
+#define trig_LC 24
+#define echo_LC 25
 
 
 //IR_trigger
-#define IR_trig_R 52
-#define IR_trig_L 53
-#define IR_trig_C 51
+#define IR_trig_R 2
+#define IR_trig_L 4
+#define IR_trig_C 3
 
 
 float dst_sonic(int trig,int echo) 
@@ -47,7 +47,7 @@ void writeMotor( const challenge1::Motor &msg){
 
 int ir2trig( int ir_in)
 {
-  return ir_in == 0? 1: 0;
+  return ir_in;
 }
 
 void wrtUsonic( challenge1::Ultrasonic &msg, float f, float h, float r, float l, float rf, float lf)
@@ -109,8 +109,8 @@ void setup()
 
 void loop()
 {
-  //wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L));
-  //pubUtrasonic.publish( &usonic);
+  wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L), dst_sonic(trig_RC,echo_RC), dst_sonic(trig_LC,echo_LC));
+  pubUtrasonic.publish( &usonic);
 
   wrtIR_trig( ir_trig, ir2trig( digitalRead( IR_trig_C)), ir2trig( digitalRead( IR_trig_R)), ir2trig( digitalRead( IR_trig_L)));
   pubIR_trigger.publish( &ir_trig);

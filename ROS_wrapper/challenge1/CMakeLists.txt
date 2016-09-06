@@ -34,7 +34,15 @@ rosbuild_add_executable( firstdemo src/demo_navigation.cpp)
 target_link_libraries(firstdemo opencv_core opencv_highgui opencv_imgproc opencv_videostab)
 
 rosbuild_add_executable(manual_arduino src/manual_arduino.cpp)
+
+
+#ROS challenge1
+include_directories(include)
+
+rosbuild_add_library(motor_ctl src/motor_ctl.cpp)
+
 rosbuild_add_executable(center_node src/main.cpp)
+target_link_libraries(center_node motor_ctl)
 
 rosbuild_add_executable( detectTraffic src/traffic_light_test.cpp)
 target_link_libraries(detectTraffic opencv_core opencv_highgui opencv_imgproc opencv_videostab)
