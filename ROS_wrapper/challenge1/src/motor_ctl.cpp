@@ -13,28 +13,28 @@ void optMotor( challenge1::Motor &mot, toward t)
 	ROS_DEBUG("operateMotor(): toward = %s", toward_enumstr[t]);
 	switch( t){
 		case( front0):
-			wrtMotor( mot, 40, 0, 40, 0);
+			wrtMotor( mot, LOW_SP, 0, LOW_SP, 0);
 			break;
 		case( front1):
-			wrtMotor( mot, 50, 0, 50, 0);
+			wrtMotor( mot, HIGH_SP, 0, HIGH_SP, 0);
 			break;
 		case( behind0):
-			wrtMotor( mot, 0, 40, 0, 40);
+			wrtMotor( mot, 0, LOW_SP, 0, LOW_SP);
 			break;
 		case( behind1):
-			wrtMotor( mot, 0, 50, 0, 50);
+			wrtMotor( mot, 0, HIGH_SP, 0, HIGH_SP);
 			break;
 		case( right0):
-			wrtMotor( mot, 0, 0, 40, 0);
+			wrtMotor( mot, 0, 0, LOW_SP, 0);
 			break;
 		case( right1):
-			wrtMotor( mot, 0, 0, 50, 0);
+			wrtMotor( mot, 0, 0, HIGH_SP, 0);
 			break;
 		case( left0):
-			wrtMotor( mot, 40, 0, 0, 0);
+			wrtMotor( mot, LOW_SP, 0, 0, 0);
 			break;
 		case( left1):
-			wrtMotor( mot, 50, 0, 0, 0);
+			wrtMotor( mot, HIGH_SP, 0, 0, 0);
 			break;
 		case( stop):
 			wrtMotor( mot, 0, 0, 0, 0);

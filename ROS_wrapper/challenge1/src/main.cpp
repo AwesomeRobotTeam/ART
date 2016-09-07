@@ -57,7 +57,7 @@ void trafColor( const challenge1::trafficLight::ConstPtr &msg)
 
 void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 {
-	ROS_DEBUG("IR_trigger: trig_c %d , trig_r %d, trig_l %d",
+	/*ROS_DEBUG("IR_trigger: trig_c %d , trig_r %d, trig_l %d",
 			( int) msg->trig_l, ( int) msg->trig_c, ( int) msg->trig_r);
 	if( ( int) msg->trig_l == 0 && ( int) msg->trig_c == 1 && ( int) msg->trig_r == 0)
 		optMotor( mot, front0);
@@ -79,7 +79,18 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 		ROS_DEBUG("black trace with 101");
 	else
 		ROS_ERROR("Bug for black tracker: trig_c %d , trig_r %d, trig_l %d",
-			( int) msg->trig_l, ( int) msg->trig_c, ( int) msg->trig_r);
+			( int) msg->trig_l, ( int) msg->trig_c, ( int) msg->trig_r);*/
+	
+	if( ( int) msg->trig_ll == 1)
+		optMotor( mot, right1);
+	else if( ( int) msg->trig_rr == 1)
+		optMotor( mot, left1);
+	else if( ( int) msg->trig_l == 1)
+		optMotor( mot, right0);
+	else if( ( int) msg->trig_r == 1)
+		optMotor( mot, left0);
+	else if( ( int) msg->trig_c == 1)
+		optMotor( mot, front0);
 }
 
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)

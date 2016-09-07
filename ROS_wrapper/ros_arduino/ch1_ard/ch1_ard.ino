@@ -26,6 +26,8 @@
 #define IR_trig_R 2
 #define IR_trig_L 4
 #define IR_trig_C 3
+#define IR_trig_RR 6
+#define IR_trig_LL 5
 
 
 float dst_sonic(int trig,int echo) 
@@ -60,11 +62,13 @@ void wrtUsonic( challenge1::Ultrasonic &msg, float f, float h, float r, float l,
    msg.lf_dst = lf;
 }
 
-void wrtIR_trig( challenge1::IR_trigger &msg , int c, int r, int l)
+void wrtIR_trig( challenge1::IR_trigger &msg , int c, int r, int l, int rr, int ll)
 {
   msg.trig_c = c;
   msg.trig_r = r;
   msg.trig_l = l;
+  msg.trig_rr = rr;
+  msg.trig_ll = ll;
 }
 
 ros::NodeHandle  nh;
@@ -109,10 +113,10 @@ void setup()
 
 void loop()
 {
-  wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L), dst_sonic(trig_RC,echo_RC), dst_sonic(trig_LC,echo_LC));
-  pubUtrasonic.publish( &usonic);
+  //wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L), dst_sonic(trig_RC,echo_RC), dst_sonic(trig_LC,echo_LC));
+  //pubUtrasonic.publish( &usonic);
 
-  wrtIR_trig( ir_trig, ir2trig( digitalRead( IR_trig_C)), ir2trig( digitalRead( IR_trig_R)), ir2trig( digitalRead( IR_trig_L)));
+  wrtIR_trig( ir_trig, ir2trig( digitalRead( IR_trig_C)), ir2trig( digitalRead( IR_trig_R)), ir2trig( digitalRead( IR_trig_L)), ir2trig( digitalRead( IR_trig_RR)), ir2trig( digitalRead( IR_trig_LL)));
   pubIR_trigger.publish( &ir_trig);
 
   nh.spinOnce();
