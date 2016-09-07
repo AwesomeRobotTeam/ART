@@ -1,0 +1,19 @@
+<package>
+  <description brief="challenge2_1">
+
+     challenge2_1
+
+  </description>
+  <author>awei</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/challenge2_1</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+

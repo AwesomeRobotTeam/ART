@@ -24,10 +24,13 @@ test2cpp:= test/navigation_test.cpp
 test3 := demo_navigation
 test3cpp:= test/demo_navigation.cpp
 
+test4 := detect_trafficLight
+test4cpp:= test/traffic_light_test.cpp
+
 RMOBJ :=\
 	$(ARDO) $(test1o) $(test1)\
 	$(test2) $(test2o) \
-	$(test3)
+	$(test3) $(test4)
 
 .PHONY: all
 all: 
@@ -42,7 +45,10 @@ $(test2): $(test2cpp)
 	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH)
 
 $(test3): $(test3cpp) $(ARDO)
-	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH) $(ARDO)
+	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH)
+
+$(test4): $(test4cpp)
+	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH)
 
 clean:
 	$(RM) -f $(RMOBJ)
