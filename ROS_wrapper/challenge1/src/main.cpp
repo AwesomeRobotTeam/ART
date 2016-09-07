@@ -91,6 +91,8 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 		optMotor( mot, left0);
 	else if( ( int) msg->trig_c == 1)
 		optMotor( mot, front0);
+	//else
+		//optMotor( mot, front0);
 }
 
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)

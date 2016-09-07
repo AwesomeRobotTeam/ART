@@ -1,7 +1,7 @@
 #include "challenge1/Motor.h"
 
-#define HIGH_SP 70
-#define LOW_SP  50
+#define HIGH_SP 30
+#define LOW_SP  30
 
 typedef enum tow{ front0, behind0, right0, left0, front1, behind1, right1, left1, stop} toward;
 
