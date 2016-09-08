@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <challenge3/Stepper.h>
+#include <challenge3/Laser_fort.h>
 #include <Stepper.h>
 
 #define lacer 7
@@ -10,18 +10,16 @@ const int stepsPerRevolution = 2048;  // change this to fit the number of steps 
 Stepper stp1(stepsPerRevolution, 5, 3, 4, 2);
 Stepper stp2(stepsPerRevolution, 11, 9, 10, 8);
 
-void wrtStepper( const challenge3::Stepper &msg)
+void wrtFort( const challenge3::Laser_fort &msg)
 {
    stp1.step( msg.rosteps1);
    stp2.step( msg.rosteps2);
-   digitalWrite( lacer, HIGH);
-   delay( 1000);
-   digitalWrite( lacer, LOW);
+   digitalWrite( lacer, msg.hit);
 }
 
 ros::NodeHandle nh;
 
-ros::Subscriber< challenge3::Stepper > substepper("Arduino_Stepper", wrtStepper);
+ros::Subscriber< challenge3::Laser_fort > subfort("Arduino_Laser_fort", wrtFort);
 
 void setup()
 {
@@ -33,7 +31,7 @@ void setup()
   //Serial.begin(57600);
   
   nh.initNode();
-  nh.subscribe( substepper);
+  nh.subscribe( subfort);
 }
 
 void loop()
