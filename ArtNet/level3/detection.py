@@ -18,13 +18,16 @@ def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
             k = k + 1
         print "|"
 
-def print_probability_table(item_list):
+def print_probability_table(item_list, targetlist=['cat','truck','automobile']):
     print "Probability table"
     k = 0
     for i in range(row):
         for j in range(col):
             if (i*col + j) < len(item_list):
-                print ("|%6.6s" % item_list[k]['probability']) ,
+                if item_list[k]['catagory'] in targetlist:
+                    print colored("|%6.6s" % item_list[k]['probability'], 'red') ,
+                else:
+                    print ("|%6.6s" % item_list[k]['probability']) ,
             else:
                 print ("|%6.6s" % 'x') ,
             k = k + 1
