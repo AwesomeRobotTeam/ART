@@ -33,9 +33,8 @@ def print_probability_table(item_list, targetlist=['cat','truck','automobile']):
             k = k + 1
         print "|"
 
-
 def get_coordinate(index):
-    return '%sb' % (index / row) + '%sb' % (index % col) + 'c'
+    return {'X-Axis':(index / row), "Y-Axis":(index % col)}
 
 def get_coordinates(item_list, targetlist=['cat','truck','automobile'], num=10):
     targets = list()
