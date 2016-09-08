@@ -8,43 +8,12 @@ import detection as dt
 import bridge 
 import time
 import ImageProcessor as imgp
+import forwarding as fwd
 
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
 pwd = os.popen("pwd").read().strip('\n') + '/'
 sys.path.insert(0, caffe_root + 'python')
 batch_size = 256
-
-def disp_preds(net, images, labels, k=5, name='ArtNotMNISTNet'):
-    input_blob = net.blobs['data']
-    for index in range(batch_size):
-        transformed_image = transformer.preprocess('data', images[index])
-        net.blobs['data'].data[index] = transformed_image
-    output_labels = list()
-    output = net.forward()
-    for index in range(batch_size):
-        probs = output['prob'][index]
-        output_labels.insert(index, {'catagory':labels[probs.argmax()], 'probability':probs[probs.argmax()], 'index':index})
-
-    return  output_labels
-
-def run_realtime_recognition(cap):
-    image_fetcher = imgp.Image_Fetcher(cap)
-    patch = image_fetcher.getPatch()
-    #padding or resize
-    patch = imgp.convert(patch,'resize')
-    #get crops
-    img_list = imgp.getCrops(patch, 16)
-    cv2.imwrite('test.jpg', constant)
-    return img_list
-
-def get_transformer(mu):
-    # create transformer for the input called 'data'
-    transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
-    transformer.set_transpose('data', (2,0,1))  # move image channels to outermost dimension
-    transformer.set_mean('data', mu)            # subtract the dataset-mean value in each channel
-    transformer.set_raw_scale('data', 255)      # rescale from [0, 1] to [0, 255]
-    transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
-    return transformer
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Argument Checker') 
@@ -98,30 +67,30 @@ if __name__ == '__main__':
     mu = np.load(args.mean)
     mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
     print 'mean-subtracted values:', zip('BGR', mu)
-    transformer = get_transformer(mu)
-    transformed_images = list()
+    transformer = fwd.get_transformer(net, mu)
+    img_list = list()
 
     tStart = time.time()
     # select input source: video, image directory or a picture
     if args.video >= 0:
         cap = cv2.VideoCapture(args.video)		
-        img_list = run_realtime_recognition(cap)
-        output = disp_preds(net, img_list, labels)
+        img_list = imgp.getRealtimeImage(cap)
+        output = fwd.disp_preds(net, img_list, labels, transformer)
         cap.release()
         cv2.destroyAllWindows() 
     elif args.image:
         dirItemList = sorted(os.listdir(args.image))
-        for i in range(len(dirItemList)):
+        for i in range(batch_size):
             input_image = caffe.io.load_image(pwd + args.image + dirItemList[i])
-            transformed_images.append(input_image)
-        output = disp_preds(net, transformed_images, labels)
+            img_list.append(input_image)
+        output = fwd.disp_preds(net, img_list, labels, transformer)
     else:
         image = cv2.imread('./collage.png')
         cv2.imshow('img', image)
         while cv2.waitKey(0) & 0xFF != ord('q'):
             continue
         img_list = imgp.getCrops(image, 16)
-        output = disp_preds(net, img_list, labels)
+        output = fwd.disp_preds(net, img_list, labels, transformer)
     tEnd = time.time()
     # show the forwarding time
     print "It cost %f sec" % (tEnd - tStart) 
@@ -134,8 +103,10 @@ if __name__ == '__main__':
     coordinates = dt.get_coordinates(output)
 
     # send the message to laser fort via serial transmission
+    #message format:bxbxbc, 1<=x<=16
     if args.device:
         ser = bridge.connect(args.device)
+        bridge.init()
         for coordinate in coordinates:
             bridge.sendmsg(ser,coordinate) 
         bridge.close(ser)
