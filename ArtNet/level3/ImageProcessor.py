@@ -34,7 +34,17 @@ class Image_Fetcher:
         cv2.destroyAllWindows()
         return patch
 
-def getSquare(patch, method):
+def getRealtimeImage(cap):
+    patch = onlySquare(cap)
+    #padding or resize
+    patch = convert(patch,'resize')
+    #get crops
+    img_list = getCrops(patch, 16)
+    #cv2.imwrite('test.jpg', constant)
+    return img_list
+
+
+def convert(patch, method):
     height, width, depth = patch.shape
     if method == 'padding':
         #padding
@@ -42,8 +52,16 @@ def getSquare(patch, method):
         w_padding = (16 - (width % 16)) / 2
         return cv2.copyMakeBorder(patch,h_padding,h_padding,w_padding,w_padding,cv2.BORDER_CONSTANT,value=[0,0,0])
     elif method == 'resize':
-        length = min(heigth, width)
+        length = 512
         return cv2.resize(patch, (length,length))
+
+def onlySquare(cap):
+    while True:
+        ret, frame = cap.read()
+        frame = frame[:,80:560,:]
+        cv2.imshow('img',frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            return frame  
 
 def get2digits(num):
     if num <= 9:
@@ -56,12 +74,14 @@ def getCrops(img, num=16):
     height, width, depth = img.shape
     crop_height = height / num
     crop_width = width / num
+    if not os.path.isdir('/tmp/crops/'):
+        os.mkdir('/tmp/crops/')
     for i in range(num):
         for j in range(num):
             crop_img = img[i*crop_height : ((i+1) * crop_height) , j * crop_width: ((j+1) * crop_width), :]
-            cv2.imwrite('Collage/test/crops/img'+get2digits(i)+get2digits(j)+'.jpg', crop_img)
-    dirItemList = sorted(os.listdir('Collage/test/crops/'))
+            cv2.imwrite('/tmp/crops/img'+get2digits(i)+get2digits(j)+'.jpg', crop_img)
+    dirItemList = sorted(os.listdir('/tmp/crops/'))
     for i in range(len(dirItemList)):
-        input_image = caffe.io.load_image('Collage/test/crops/' + dirItemList[i])
+        input_image = caffe.io.load_image('/tmp/crops/' + dirItemList[i])
         crop_imgs.append(input_image)
     return crop_imgs       
