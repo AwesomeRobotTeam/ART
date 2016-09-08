@@ -12,8 +12,8 @@ Stepper stp2(stepsPerRevolution, 11, 9, 10, 8);
 
 void wrtFort( const challenge3::Laser_fort &msg)
 {
-   stp1.step( msg.rosteps1);
-   stp2.step( msg.rosteps2);
+   stp1.step( msg.rotsteps1);
+   stp2.step( msg.rotsteps2);
    digitalWrite( lacer, msg.hit);
 }
 
