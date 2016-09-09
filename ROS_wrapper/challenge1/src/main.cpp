@@ -97,14 +97,16 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)
 {
-	if( ( int) msg->r_dst < 20)
+	if( 5 < ( int) msg->r_dst && ( int) msg->r_dst < 40)
 		optMotor( mot, front1);
-	else if( ( int) msg->l_dst < 20)
+	else if( 5 < ( int) msg->l_dst && ( int) msg->l_dst < 40)
 		optMotor( mot, front1);
-	else if( ( int) msg->f_dst < 10)
+	else if( 5 < ( int) msg->f_dst &&  ( int) msg->f_dst < 30)
 		optMotor( mot, stop);
-	else if( ( int) msg->rf_dst < 15)
+	else if( 5 < ( int) msg->rf_dst &&  ( int) msg->rf_dst < 35)
 		optMotor( mot, stop);
-	else if( ( int) msg->rf_dst < 15)
+	else if(  5 < ( int) msg->lf_dst && ( int) msg->lf_dst < 35)
 		optMotor( mot, stop);
+	else
+		optMotor( mot, front0);
 }

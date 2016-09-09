@@ -10,7 +10,7 @@
 #define rightwheel1 9
 
 //Ultrasonic
-#define TIMEOUT 500 //microsecond
+#define TIMEOUT 4000 //microsecond
 #define trig_R 28
 #define echo_R 29
 #define trig_C 32
@@ -35,9 +35,10 @@ float dst_sonic(int trig,int echo)
 {
   float duration;
   digitalWrite(trig, HIGH);
-  delayMicroseconds(500);
+  delayMicroseconds(1000);
   digitalWrite(trig, LOW);
   duration = pulseIn(echo, HIGH, TIMEOUT);
+  //duration = pulseIn(echo, HIGH);
   return duration/2/29.1;  
 }
 
@@ -77,7 +78,7 @@ ros::NodeHandle  nh;
 ros::Subscriber< challenge1::Motor > submotor("Arduino_Motor", writeMotor );
 
 challenge1::Ultrasonic usonic;
-ros::Publisher pubUtrasonic("Arduino_Ultrasonic", &usonic);
+ros::Publisher pubUltrasonic("Arduino_Ultrasonic", &usonic);
 
 challenge1::IR_trigger ir_trig;
 ros::Publisher pubIR_trigger("Arduino_IR_trigger", &ir_trig);
@@ -108,17 +109,17 @@ void setup()
   //ROS
   nh.initNode();
   nh.subscribe(submotor);
-  nh.advertise(pubUtrasonic);
+  nh.advertise(pubUltrasonic);
   nh.advertise( pubIR_trigger);
 }
 
 void loop()
 {
-  //wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L), dst_sonic(trig_RC,echo_RC), dst_sonic(trig_LC,echo_LC));
-  //pubUtrasonic.publish( &usonic);
+  wrtUsonic( usonic, dst_sonic(trig_C,echo_C), 0, dst_sonic(trig_R,echo_R), dst_sonic(trig_L,echo_L), dst_sonic(trig_RC,echo_RC), dst_sonic(trig_LC,echo_LC));
+  pubUltrasonic.publish( &usonic);
 
-  wrtIR_trig( ir_trig, ir2trig( digitalRead( IR_trig_C)), ir2trig( digitalRead( IR_trig_R)), ir2trig( digitalRead( IR_trig_L)), ir2trig( digitalRead( IR_trig_RR)), ir2trig( digitalRead( IR_trig_LL)));
-  pubIR_trigger.publish( &ir_trig);
+  //wrtIR_trig( ir_trig, ir2trig( digitalRead( IR_trig_C)), ir2trig( digitalRead( IR_trig_R)), ir2trig( digitalRead( IR_trig_L)), ir2trig( digitalRead( IR_trig_RR)), ir2trig( digitalRead( IR_trig_LL)));
+  //pubIR_trigger.publish( &ir_trig);
 
   nh.spinOnce();
   //delay(100);
