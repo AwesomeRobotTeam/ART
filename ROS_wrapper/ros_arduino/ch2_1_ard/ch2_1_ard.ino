@@ -6,10 +6,10 @@
 
 //Ultrasonic
 #define TIMEOUT 500 //micosecond
-#define trig_U       1
-#define echo_U   2
-#define trig_D       3
-#define echo_D   4
+#define trig_U       2
+#define echo_U   3
+#define trig_D       4
+#define echo_D   5
 
 //Arm
 #define Base 0
