@@ -4,8 +4,8 @@
 #define trig_C 4
 #define echo_C 5
 
-#define trig_L 6
-#define echo_L 7
+#define trig_L 36
+#define echo_L 37
 
 void setup() {
   // put your setup code here, to run once:
@@ -36,29 +36,29 @@ void loop() {
   distance_R = sonic(trig_R,echo_R);
   distance_L = sonic(trig_L,echo_L);
  
-  /*Serial.print(distance_R);
-  Serial.println(" cm_R");*/
+  Serial.print(distance_R);
+  Serial.println(" cm_R");
 
 
-/*  digitalWrite(trig_C, HIGH);
+  digitalWrite(trig_C, HIGH);
   delayMicroseconds(1000);
   digitalWrite(trig_C, LOW);
   duration_C = pulseIn(echo_C, HIGH);
   distance_C = duration_C/2/29.1;
 
-  /*Serial.print(distance_C);
-  Serial.println(" cm_C");*/
+  Serial.print(distance_C);
+  Serial.println(" cm_C");
 
-/*  digitalWrite(trig_L, HIGH);
+  digitalWrite(trig_L, HIGH);
   delayMicroseconds(1000);
   digitalWrite(trig_L, LOW);
   duration_L = pulseIn(echo_L, HIGH);
-  distance_L = duration_L/2/29.1;*/
+  distance_L = duration_L/2/29.1;
 
-  /*Serial.print(distance_L);
-  Serial.println(" cm_L");*/
+  Serial.print(distance_L);
+  Serial.println(" cm_L");
 
- // delay(1000);
+  //delay(1000);
 
   if((distance_R < 20) || (distance_C < 20) || (distance_L < 20)){
     backward();
