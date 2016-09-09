@@ -3,15 +3,17 @@ import sys
 sys.path.append("/home/rche/ART/ROS_wrapper/challenge3/src")
 import rospy
 from challenge3.msg import Laser_fort
-import tty, termios, sys
+import tty, termios
 import signal
+import time
 
 class laser:
-    #constructor
-    def __init__(self, distance, width=-1, height=-1, precision=5, table=list()):
+    #laser constructor
+    def __init__(self, distance, sideLength, height, width, searchTable=True, precision=5):
         self.precision = precision
-        self.table = table
+        self.table = self.readTableFile('./steps.txt') if searchTable else None
         self.laser2wall_distance = distance
+        self.gridLength = sideLength / 16
         self.laser = 0
         
         # ROS init start
@@ -19,56 +21,12 @@ class laser:
         self.pubStepper = rospy.Publisher("Arduino_Laser_fort", Laser_fort, queue_size=10)
         # ROS init end
                 
-        self.center()
-        if width >= 0:
-            self.width_steps = width
-        else:
-            self.width_steps = self.calculateSteps('X')
-        if height >= 0:
-            self.height_steps = height
-        else:
-            self.height_steps = self.calculateSteps('Y')
- 
-        # initialize the stepper and locate the 4 corner
-    def initLaser(self):
-        print 'Start to initialize the laser fort...please control the stepper to target on 4 corners'
-        print 'Press \'q\' to exit the init'
-        i = 1
-        while getchar() != 'o': 
-            continue
-        self.laser = 1
-        self.move(0, 0, self.laser)
-        while i <= 4: 
-            ch = getchar()
-            if ch == '\x1b' and '[' == getchar():
-                ch = getchar() 
-                if ch == 'A':
-                    print 'up'
-                    self.move(0, self.precision, self.laser)
-                elif ch == 'B':
-                    print 'down'
-                    self.move(0, -self.precision, self.laser)
-                elif ch == 'C':
-                    print 'right'
-                    self.move(self.precision, 0, self.laser)
-                elif ch == 'D':
-                    print 'left'
-                    self.move(-self.precision, 0, self.laser)
-            elif ch == ' ':
-                print 'set %d\'s corner' % i
-                #TODO transmit the message to arduino
-                i = i + 1
-            elif ch == 'q':
-                self.laser = 0
-                self.move(0, 0, self.laser)
-                return
-            else:
-                continue
-        print 'All corners are set'
-        #TODO transmit the message to arduino
+        self.controlLaser()
+        self.width_steps = width if width >= 0 else self.calculateSteps('X')
+        self.height_steps = height if height >= 0 else self.calculateSteps('Y') 
 
     # laser to center
-    def center(self):
+    def controlLaser(self):
        while True: 
             ch = getchar()
             if ch == '\x1b' and '[' == getchar():
@@ -131,20 +89,42 @@ class laser:
             else:
                 continue
 
-    def shoot(self, x, y):
-        #search table
-        print 'shoot'
+    def shoot1(self, x, y):
+        # search table
+        index = x * 16 + y
+        print str(self.table[index]['X-Axis']*self.precision) + '   ' + str(self.table[index]['Y-Axis']*self.precision)
+        self.move(self.table[index]['Y-Axis']*self.precision, self.table[index]['X-Axis']*self.precision, 1)
+        time.sleep(3)
+        #self.move(0 ,0 , 0)
+        self.move(-self.table[index]['Y-Axis']*self.precision, -self.table[index]['X-Axis']*self.precision, 1)
 
-    def back2center(self):
-        print 'back2center'
+    def shoot2(self, x, y):
+        # calculate the anglei
+        None
 
-    def move(self, x,y,h):
+    def move(self, x, y, h):
         try:
             if not rospy.is_shutdown(): 
                 self.pubStepper.publish( rotsteps1 = x, rotsteps2 = y, hit = h)
         except rospy.ROSInterruptException: 
             pass
-        
+
+    def shutdown(self):
+        self.move(0, 0, 0)
+
+    def readTableFile(self, path):
+        table = list()
+        with open(path) as f:
+            contents = f.readlines()
+            if len(contents) != 256:
+                print 'File format error: less than 256 lines'
+                return
+            else:
+                for index in range(256):
+                    content = contents[index].split()
+                    table.insert(index,{'X-Axis':int(content[0]), 'Y-Axis':int(content[1])})
+        return table
+                
 # Returns a single character from standard input
 def getchar():     
     fd = sys.stdin.fileno()
@@ -155,5 +135,3 @@ def getchar():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
-
-laser = laser(10 , 0, 0)
