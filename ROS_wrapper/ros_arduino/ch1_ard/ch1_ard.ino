@@ -10,6 +10,7 @@
 #define rightwheel1 9
 
 //Ultrasonic
+#define TIMEOUT 500 //microsecond
 #define trig_R 28
 #define echo_R 29
 #define trig_C 32
@@ -34,9 +35,9 @@ float dst_sonic(int trig,int echo)
 {
   float duration;
   digitalWrite(trig, HIGH);
-  delayMicroseconds(1000);
+  delayMicroseconds(500);
   digitalWrite(trig, LOW);
-  duration = pulseIn(echo, HIGH);
+  duration = pulseIn(echo, HIGH, TIMEOUT);
   return duration/2/29.1;  
 }
 
