@@ -15,6 +15,10 @@ void wrtFort( const challenge3::Laser_fort &msg)
    stp1.step( msg.rotsteps1);
    stp2.step( msg.rotsteps2);
    digitalWrite( lacer, msg.hit);
+   if( msg.hit = 1)
+     delay(3000);
+   else
+     delay( 100);
 }
 
 ros::NodeHandle nh;
