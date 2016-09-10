@@ -2,6 +2,7 @@
 import cv2
 import sys
 sys.path.append('/home/rche/ART/ROS_wrapper/challenge3/script/module/')
+print 'Start caffe......'
 import caffe
 import numpy as np
 import os
@@ -17,16 +18,16 @@ pwd = os.popen("pwd").read().strip('\n') + '/'
 sys.path.insert(0, caffe_root + 'python')
 batch_size = 256
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     parser = argparse.ArgumentParser(description='Argument Checker') 
     parser.add_argument("-v", "--video", type=int, help="set video source", default=-1)
     parser.add_argument("-i", "--image", type=str, help="image path")
-    parser.add_argument("-gpu", "--gpu", type=int, help="use gpu to forwarding the classification")
+    parser.add_argument("-gpu", "--gpu", type=int, nargs='?', const=0 , help="use gpu to forwarding the classification")
     parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./model/cifar10_predict.prototxt')
     parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./model/cifar10_predict.caffemodel')
     parser.add_argument("-l", "--label", type=str, help="the path of label file", default='./model/label.txt')
     parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='./model/mean.npy')
-    parser.add_argument("-d", "--device", type=str, help="the device name")
+    parser.add_argument("-r", "--ros", type=str, nargs='?', const=True, help="run with ROS")
     args = parser.parse_args()
 
     # select computing device
@@ -36,25 +37,28 @@ if __name__ == '__main__':
     else:
         caffe.set_mode_cpu()
 
+    print 'Loading......'
+    
     # Load weights file
     if args.weight:
         weights = args.weight
+        assert os.path.exists(weights)
     else:
         print 'should define the path of trained weight file'
         sys.exit()
-    print weights
-    assert os.path.exists(weights)
-
+    
     # load net definition
     if args.net:
         net_definition = args.net
-        print net_definition
         assert os.path.exists(net_definition)
+        sys.stderr.close()
+        os.close(2)
         net = caffe.Net(net_definition, weights, caffe.TEST)
         net.blobs['data'].reshape(batch_size, 3, 32, 32)
     else:
         print 'should define the path of network definition protobuf'
-
+        sys_exit()
+    
     # Load labels file
     if args.label:
         label_file = args.label
@@ -62,16 +66,22 @@ if __name__ == '__main__':
         labels = list(np.loadtxt(label_file, str, delimiter='\t'))
     else:
         print 'should define the path of label file'
+        sys_exit()
 
     # load the mean ImageNet image (as distributed with Caffe) for subtraction
     if args.mean:
         assert os.path.exists(args.mean)
-    mu = np.load(args.mean)
-    mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
-    print 'mean-subtracted values:', zip('BGR', mu)
+        mu = np.load(args.mean)
+        mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
+    else:
+        print 'should define the path of image mean' 
+        sys_exit()
+    
+    print 'Loading success......'
     transformer = fwd.get_transformer(net, mu)
     img_list = list()
 
+    print 'Forwarding......pleae wait......'
     tStart = time.time()
     # select input source: video, image directory or a picture
     if args.video >= 0:
@@ -106,8 +116,12 @@ if __name__ == '__main__':
     coordinates = dt.get_coordinates(output)
 
     # send the message to laser fort via ROS
-    if args.device:
+    if args.ros:
         laser = laser(10, True, 0, 0)
         for coordinate in coordinates:
             laser.shoot1(coordinate['X-Axis'], coordinate['Y-Axis'])
-        laser.shutdown()
+        laser.shutdown() 
+
+    # free memory
+    del img_list
+    del net 
