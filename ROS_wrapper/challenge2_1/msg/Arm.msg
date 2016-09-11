@@ -2,21 +2,24 @@
 #
 #			Upper Arm
 #			/				\
-#	Lowwer Arm	Clip
+#	Lowwer Arm	 Wrist --Clip
 #			|
 #		Base
 
 # > 0 : right, Up
 # < 0 : left , Down
 
-#Base: left and right rotation
+# Base: left and right rotation (Stepper)
 int16 baseSteps
 
-#Lowwer Arm: Up and down rotation
+# Lowwer Arm: Up and down rotation (Stepper)
 int16 lowerSteps
 
-#Upper Arm: Up and down rotation
+# Upper Arm: Up and down rotation (Stepper)
 int16 upperSteps
 
-#Clip: left and right rotation angular
+# Wrist: Up and down rotation (Servo)
+int16 wristAngular
+
+# Clip: left and right rotation angular (Servo)
 int16 clipAngular
