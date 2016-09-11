@@ -4,15 +4,17 @@ sys.path.append("/home/rche/ART/ROS_wrapper/challenge3/src")
 import rospy
 from challenge3.msg import Laser_fort
 import tty, termios
-import signal
+import math
 import time
+
+anglePerStep = (2 * math.pi) / 2048
 
 class laser:
     #laser constructor
-    def __init__(self, distance, sideLength, height, width, searchTable=True, precision=5):
+    def __init__(self, distance=200, sideLength=16, searchTable=True, precision=5):
         self.precision = precision
         self.table = self.readTableFile('./steps.txt') if searchTable else None
-        self.laser2wall_distance = distance
+        self.laser2wall = distance
         self.gridLength = sideLength / 16
         self.laser = 0
         
@@ -22,12 +24,12 @@ class laser:
         # ROS init end
                 
         self.controlLaser()
-        self.width_steps = width if width >= 0 else self.calculateSteps('X')
-        self.height_steps = height if height >= 0 else self.calculateSteps('Y') 
 
     # laser to center
     def controlLaser(self):
-       while True: 
+        print '1. Press space to light up/down the laser.'
+        print '2. Press \'q\' to exit.'
+        while True: 
             ch = getchar()
             if ch == '\x1b' and '[' == getchar():
                 ch = getchar()
@@ -43,6 +45,7 @@ class laser:
                 self.laser = self.laser ^ 1
                 self.move(0, 0, self.laser)
             elif ch == 'q':
+                print 'Exit controlling.'
                 return
             else:
                 continue
@@ -93,25 +96,44 @@ class laser:
         # search table
         index = x * 16 + y
         print str(self.table[index]['X-Axis']*self.precision) + '   ' + str(self.table[index]['Y-Axis']*self.precision)
-        self.move(self.table[index]['Y-Axis']*self.precision, self.table[index]['X-Axis']*self.precision, 1)
-        time.sleep(3)
-        #self.move(0 ,0 , 0)
-        self.move(-self.table[index]['Y-Axis']*self.precision, -self.table[index]['X-Axis']*self.precision, 1)
+        # the process must wait for seconds until laser daley completed, otherwise the system will get error result
+        self.move(self.table[index]['Y-Axis']*self.precision, self.table[index]['X-Axis']*self.precision, 1, 3000)
+        time.sleep(5)
+        #return to the datum point
+        self.move(-self.table[index]['Y-Axis']*self.precision, -self.table[index]['X-Axis']*self.precision, 1, 0)
 
     def shoot2(self, x, y):
-        # calculate the anglei
-        None
+        # calculate the rotate angles
+        base = abs(x-7) * self.gridLength - (self.gridLength / 2)
+        height = abs(y-7) * self.gridLength - (self.gridLength / 2)
+        laser2target = math.sqrt(math.square(base) + math.square(height) + math.square(self.laser2wall))
 
-    def move(self, x, y, h):
+        yaw = math.asin(x / laser2target)
+        pitch = math.acos(y / laser2target)
+        unit22yaw = yaw / anglePerStep
+        units2pitch = pitch / anglePerStep
+        quadrant = getQuadrant(x,y)
+        print 'quadrant : %d' % quadrant
+        if qurdrant == 1 or quadrant == 3:
+            units2yaw = -units2yaw 
+        if quadrant == 3 or quadrant == 4:
+            units2pitch = -units2pitch
+        print 'steps to yaw %f \t steps to pitch %f' % (units2yaw, units2pitch)
+        self.move(units2yaw*self.precision, units2pitch*self.precision, 1, 3000)
+        time.sleep(5)
+        # return to the datum point
+        self.move(-units2yaw*self.precision, -units2pitch*self.precision, 1, 0)
+    
+    def shutdown(self):
+        self.move(0, 0, 0, 0)
+
+    def move(self, x, y, h, t=0):
         try:
             if not rospy.is_shutdown(): 
-                self.pubStepper.publish( rotsteps1 = x, rotsteps2 = y, hit = h)
+                self.pubStepper.publish( rotsteps1 = x, rotsteps2 = y, hit = h, delay = t)
         except rospy.ROSInterruptException: 
             pass
-
-    def shutdown(self):
-        self.move(0, 0, 0)
-
+    
     def readTableFile(self, path):
         table = list()
         with open(path) as f:
@@ -135,3 +157,14 @@ def getchar():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
+
+# Return the quadrant of (x,y)
+def getQuardrant(x, y):
+    if x <= 7 and y <= 7:
+        return 1
+    elif x <= 7 and y > 7:
+        return 2
+    elif x > 7 and y <= 7:
+        return 3
+    else:
+        return 4
