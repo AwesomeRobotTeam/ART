@@ -1,3 +1,5 @@
+#ifndef OBJECT_H
+#define OBJECT_H
 /**/
 #define ELEVATE 		0		  
 
@@ -42,12 +44,14 @@ struct arm{
 	const float height;
 };
 
+
+obj_arm obj[] = {
 /**
  *		v
  *		*---
  */
-obj_arm arm_base
-= { .tag = Base, .flat = xy, .m_type = Stepper, .cur_motor.stepper_now = 0, .l_coord = { 0., 0., 0.}, .g_coord = { 0., 0., ELEVATE}, .length = 0, .width = 0, .height = BASE_H};
+
+{ .tag = Base, .flat = xy, .m_type = Stepper, .cur_motor.stepper_now = 0, .l_coord = { 0., 0., 0.}, .g_coord = { 0., 0., ELEVATE}, .length = 0, .width = 0, .height = BASE_H},
 /**
  * NOTICE:
  *	(X) l_coord[] = { 0., 0., 0.}
@@ -58,15 +62,15 @@ obj_arm arm_base
  *				v
  *		*---*---
  */
-obj_arm arm_lowwer
-= { .tag = Lowwer, .flat = yz, .m_type = Stepper, .cur_motor.stepper_now = 0, .l_coord = { 0., 0., BASE_H}, .g_coord = { 0., 0., ELEVATE + BASE_H}, .length = LOWER_L, .width = 0, .length = 0};
+
+{ .tag = Lowwer, .flat = yz, .m_type = Stepper, .cur_motor.stepper_now = 0, .l_coord = { 0., 0., BASE_H}, .g_coord = { 0., 0., ELEVATE + BASE_H}, .length = LOWER_L, .width = 0, .length = 0},
 
 /**
  *					 v
  *	 *---*---*---
  */
- obj_arm arm_upper
-= { .tag = Upper, .flat = yz, .m_type = Stepper, .cur_motor.stepper_now = 0, .l_coord = { LOWER_L, 0., BASE_H}, .g_coord = { LOWER_L, 0., ELEVATE + BASE_H}, .length = UPPER_L, .width = 0, .height = 0};
+
+{ .tag = Upper, .flat = yz, .m_type = Stepper, .cur_motor.stepper_now = 0, .l_coord = { LOWER_L, 0., BASE_H}, .g_coord = { LOWER_L, 0., ELEVATE + BASE_H}, .length = UPPER_L, .width = 0, .height = 0},
 
 /**
  *							 v
@@ -74,8 +78,8 @@ obj_arm arm_lowwer
  *							 |	 |
  *							 *---*
  */
- obj_arm wrist
-= { .tag = Wrist, .flat = xy, .m_type = Servo, .cur_motor.servo_now = 0, .l_coord = { LOWER_L + UPPER_L, 0., BASE_H}, .g_coord = { LOWER_L + UPPER_L, 0., ELEVATE + BASE_H}, .length = WRIST_L, .width = WRIST_W, .height = WRIST_H};
+
+{ .tag = Wrist, .flat = xy, .m_type = Servo, .cur_motor.servo_now = 0, .l_coord = { LOWER_L + UPPER_L, 0., BASE_H}, .g_coord = { LOWER_L + UPPER_L, 0., ELEVATE + BASE_H}, .length = WRIST_L, .width = WRIST_W, .height = WRIST_H},
 
 /**
  *							 
@@ -85,6 +89,8 @@ obj_arm arm_lowwer
  *									 ^\
  *										 \
  */
- obj_arm clip
-= { .tag = Clip, .flat = xy, .m_type = Servo, .cur_motor.servo_now = 0, .l_coord = {LOWER_L + UPPER_L + WRIST_L, WRIST_W, BASE_H - WRIST_H}, .g_coord = { LOWER_L + UPPER_L + WRIST_L, WRIST_W, ELEVATE + BASE_H}, .length = CLIP_L, .width = CLIP_W, .height = 0};
 
+{ .tag = Clip, .flat = xy, .m_type = Servo, .cur_motor.servo_now = 0, .l_coord = {LOWER_L + UPPER_L + WRIST_L, WRIST_W, BASE_H - WRIST_H}, .g_coord = { LOWER_L + UPPER_L + WRIST_L, WRIST_W, ELEVATE + BASE_H}, .length = CLIP_L, .width = CLIP_W, .height = 0}
+
+};
+#endif
