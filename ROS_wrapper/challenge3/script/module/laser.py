@@ -4,14 +4,14 @@ sys.path.append("/home/rche/ART/ROS_wrapper/challenge3/src")
 import rospy
 from challenge3.msg import Laser_fort
 import tty, termios
-import math
+import math, pylab
 import time
 
 anglePerStep = (2 * math.pi) / 2048
 
 class laser:
     #laser constructor
-    def __init__(self, distance=200, sideLength=16, searchTable=True, precision=5):
+    def __init__(self, distance=15, sideLength=17.6, searchTable=True, precision=5):
         self.precision = precision
         self.table = self.readTableFile('./steps.txt') if searchTable else None
         self.laser2wall = distance
@@ -102,19 +102,19 @@ class laser:
         #return to the datum point
         self.move(-self.table[index]['Y-Axis']*self.precision, -self.table[index]['X-Axis']*self.precision, 1, 0)
 
-    def shoot2(self, x, y):
+    def shoot2(self, x, y, datum_point_x=7, datum_point_y=7):
         # calculate the rotate angles
-        base = abs(x-7) * self.gridLength - (self.gridLength / 2)
-        height = abs(y-7) * self.gridLength - (self.gridLength / 2)
-        laser2target = math.sqrt(math.square(base) + math.square(height) + math.square(self.laser2wall))
+        base = abs(x-datum_point_x) * self.gridLength - (self.gridLength / 2)
+        height = abs(y-datum_point_y) * self.gridLength - (self.gridLength / 2)
+        laser2target = math.sqrt(pylab.square(base) + pylab.square(height) + pylab.square(self.laser2wall))
 
         yaw = math.asin(x / laser2target)
         pitch = math.acos(y / laser2target)
-        unit22yaw = yaw / anglePerStep
+        units2yaw = yaw / anglePerStep
         units2pitch = pitch / anglePerStep
         quadrant = getQuadrant(x,y)
         print 'quadrant : %d' % quadrant
-        if qurdrant == 1 or quadrant == 3:
+        if quadrant == 1 or quadrant == 3:
             units2yaw = -units2yaw 
         if quadrant == 3 or quadrant == 4:
             units2pitch = -units2pitch
@@ -159,7 +159,7 @@ def getchar():
     return ch
 
 # Return the quadrant of (x,y)
-def getQuardrant(x, y):
+def getQuadrant(x, y):
     if x <= 7 and y <= 7:
         return 1
     elif x <= 7 and y > 7:
@@ -168,3 +168,13 @@ def getQuardrant(x, y):
         return 3
     else:
         return 4
+
+if __name__ == '__main__':
+    laser = laser()
+    while True:
+        coordinate = raw_input().split()
+        if coordinate[0] == 'q':
+            break
+        else:
+            print "x : %s \t y : %s" % (coordinate[0], coordinate[1])
+            laser.shoot2(int(coordinate[0]), int(coordinate[1]))
