@@ -11,6 +11,8 @@
 #define trig_D       4
 #define echo_D   5
 
+//Notice  (+) = clockwise, (-) = anti-clockwise 
+// so we should consider the position of Upper and Lower
 //Arm
 #define Base 0
 #define Lower 1
@@ -92,11 +94,13 @@ void StepperControl(int a, boolean b, int c)
   //nh.loginfo(" micros() - t0 = %f", micros() - t0);
 }
 
+//Notice  (+) = clockwise, (-) = anti-clockwise 
 void wrtArm( const challenge2_1::Arm &msg)
 {
   StepperControl( abs( msg.baseSteps), msg.baseSteps >  0, Base);
+  //Due to the 
   StepperControl( abs( msg.lowerSteps), msg.lowerSteps >  0, Lower);
-  StepperControl( abs( msg.upperSteps),msg.upperSteps  >  0, Upper);
+  StepperControl( abs( msg.upperSteps),msg.upperSteps >  0, Upper);
   clip.write( msg.clipAngular);
 }
 

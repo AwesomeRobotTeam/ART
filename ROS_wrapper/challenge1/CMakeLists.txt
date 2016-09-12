@@ -37,7 +37,7 @@ rosbuild_add_executable(manual_arduino src/manual_arduino.cpp)
 
 
 #ROS challenge1
-include_directories(include)
+include_directories( include ..)
 
 rosbuild_add_library(motor_ctl src/motor_ctl.cpp)
 
