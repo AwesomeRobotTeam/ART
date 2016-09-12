@@ -1,18 +1,6 @@
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
+#include "arm.hpp"
+#include "rad_trf.hpp"
 
-#define THETA 0
-#define PHI		1
-
-#define BASE	0
-#define LOW		1
-#define UP		2
-#define WRIST 3
-
-/*PI = 3200 steps*/
-#define PI2STEPS 			3200
-#define RAD_PER_STEP	( 1/ PI2STEPS)
 /**
  *		^ +z
  *		|
@@ -23,13 +11,6 @@
  * v
  *
  */
-
-//squared
-static inline
-double sq( double num)
-{
-	return num*num;
-}
 
 //Lower and Upper
 double*
@@ -63,19 +44,4 @@ coord2armrad( double x, double y , double z, double a, double b, double c)
 	free( tmp);
 
 	return ret;
-}
-
-
-//transfer radian to stepper steps
-inline int
-rad2step( double rad)
-{
-	return ( int) round( rad * RAD_PER_STEP);
-}
-
-//transfer radian to angular
-inline double
-rad2ang( double rad)
-{
-	return rad * ( 180 / M_PI);
 }

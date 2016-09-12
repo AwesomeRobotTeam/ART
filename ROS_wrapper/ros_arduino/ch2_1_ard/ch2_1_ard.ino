@@ -20,6 +20,8 @@
 const byte EN[3] = {8, 43, 49};
 const byte DIR[3] = {9, 45, 51};
 const byte CLK[3] = {10, 47, 53};
+#defien Wrist 6
+Servo wrist;
 #define Clip 7
 Servo clip;
 
@@ -101,7 +103,8 @@ void wrtArm( const challenge2_1::Arm &msg)
   //Due to the 
   StepperControl( abs( msg.lowerSteps), msg.lowerSteps >  0, Lower);
   StepperControl( abs( msg.upperSteps),msg.upperSteps >  0, Upper);
-  clip.write( msg.clipAngular);
+  clip.write( msg.wristAngle
+  clip.write( msg.clipAngle);
 }
 
 //ROS Init varible
@@ -132,7 +135,8 @@ void setup()
   pinMode(CLK[0], OUTPUT);
   pinMode(DIR[0], OUTPUT);
 
-  //Arm Clip
+  //Arm Servo
+  wrist.attach( Wrist);
   clip.attach( Clip);
  
   //ROS

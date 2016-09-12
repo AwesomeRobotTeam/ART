@@ -29,7 +29,12 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 include_directories( include ..)
 
+rosbuild_add_library( arm 		src/arm.cpp)
+rosbuild_add_library( arm_ctl src/arm_ctl.cpp)
+
 rosbuild_add_executable(main src/main.cpp)
-target_link_libraries( main m)
+target_link_libraries( main m arm arm_ctl )

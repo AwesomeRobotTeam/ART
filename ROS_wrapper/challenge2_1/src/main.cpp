@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include "arm.cpp"
+#include "arm.hpp"
+#include "arm_ctl.hpp"
+#include "rad_trf.hpp"
 
 #include "ros_api.h"
 #include "challenge2_1/Arm.h"
@@ -25,7 +27,7 @@ main( int argc, char** argv)
 	while( ros::ok())
 	{
 		manul_assign( arm);
-		//armpub.publish( arm);
+		armpub.publish( arm);
 
 		ros::spinOnce();
 		loop_rate.sleep();
@@ -41,6 +43,11 @@ manul_assign( challenge2_1::Arm &msg)
 
 	double* rad = coord2armrad( tmp[0], tmp[1], tmp[2], 1, 1, 1);
 	printf("Input rad = %lf, y = %lf, z = %lf", rad2ang( rad[0]), rad2ang( rad[1]), rad2ang( rad[2]));
+
+	arm_ctl( msg, tmp[0], tmp[1] - UPPER_W - WRIST_W, tmp[2] + WRIST_H);
+
+	//Real
+	//arm_ctl( msg, tmp[0], tmp[1] - XXX, tmp[2] + XXX);
 
 	/*msg.baseSteps  = rad[0];
 	msg.lowerSteps = rad[1];

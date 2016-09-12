@@ -18,8 +18,9 @@ int16 lowerSteps
 # Upper Arm: Up and down rotation (Stepper)
 int16 upperSteps
 
+#Servo can only be represented from 0 to 180
 # Wrist: Up and down rotation (Servo)
-int16 wristAngular
+uint16 wristAngle
 
 # Clip: left and right rotation angular (Servo)
-int16 clipAngular
+uint16 clipAngle
