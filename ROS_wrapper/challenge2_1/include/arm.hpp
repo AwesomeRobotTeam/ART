@@ -1,3 +1,6 @@
+#ifndef ARM_HPP
+#define ARM_HPP
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -36,3 +39,5 @@ bend2rad( double x, double y, double a, double b);
 //transfer coordinate to radian
 double*
 coord2armrad( double x, double y , double z, double a, double b, double c);
+
+#endif
