@@ -93,7 +93,7 @@ if __name__ == '__main__':
     elif args.image:
         dirItemList = sorted(os.listdir(args.image))
         for i in range(batch_size):
-            input_image = caffe.io.load_image(pwd + args.image + dirItemList[i])
+            input_image = caffe.io.load_image(args.image + dirItemList[i])
             img_list.append(input_image)
         output = fwd.disp_preds(net, img_list, labels, transformer)
     else:
