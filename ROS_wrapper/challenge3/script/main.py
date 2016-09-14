@@ -7,8 +7,8 @@ print 'Start caffe......'
 import caffe
 import numpy as np
 import argparse
-import detection as dt
 import time
+import detection as dt
 import ImageProcessor as imgp
 import forwarding as fwd
 from laser import laser
@@ -85,8 +85,12 @@ if __name__ == '__main__':
     tStart = time.time()
     # select input source: video, image directory or a picture
     if args.video >= 0:
-        cap = cv2.VideoCapture(args.video)		
-        img_list = imgp.getRealtimeImage(cap)
+        cap = cv2.VideoCapture(args.video)
+        #img_list = imgp.getRealtimeImage(cap)
+        fetcher = imgp.Image_Fetcher(cap)
+        if not fetcher.getPatch() and fetcher.patch == None:
+            sys.exit()
+        img_list = imgp.getCrops(fetcher.patch)
         output = fwd.disp_preds(net, img_list, labels, transformer)
         cap.release()
         cv2.destroyAllWindows() 

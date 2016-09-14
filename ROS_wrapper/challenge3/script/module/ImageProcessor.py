@@ -1,4 +1,5 @@
 import cv2
+#import fetcher as fetcher
 import fetcher
 import signal
 import os
@@ -20,10 +21,10 @@ class Image_Fetcher:
             # Capture frame-by-frame
             ret, frame = self.cap.read()
             cv2.waitKey(1)
-            #print self.key
-            if self.myFetcher.calibrate(frame, self.key):
+            if self.myFetcher.calibrate(frame, self.key):    
+                self.key = 1
                 break
-        self.key = 1
+            self.key = 1
         while(True):
             # Capture frame-by-frame
             ret, frame = self.cap.read() 
@@ -32,7 +33,7 @@ class Image_Fetcher:
                 break
             self.patch = self.myFetcher.segment(frame) 
         cv2.destroyAllWindows()
-        return patch
+        return True
 
 def getRealtimeImage(cap):
     patch = onlySquare(cap)
