@@ -8,7 +8,7 @@
 
 void arm_ctl( challenge2_1::Arm &msg, double x, double y, double z)
 {
-	double* rad = coord2armrad( x, y, z, obj[ BASE].height, obj[ LOW].length, obj[ UP].length);
+	double* rad = coord2armrad( x, y, z, obj[ LOW].length, obj[ UP].length, obj[ WRIST].length);
 
 
 	printf("arm_ctl rad x = %lf, y = %lf, z = %lf", rad2ang( rad[0]), rad2ang( rad[1]), rad2ang( rad[2]));

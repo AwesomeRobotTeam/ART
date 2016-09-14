@@ -16,14 +16,17 @@
 double*
 bend2rad( double x, double y, double a, double b)
 {
-	double trgRad = atan( y/x) > 0? atan( y/x) : M_PI + atan( y/x);//unit is Radian not angular
+	double trgRad = atan( y/x) >= 0? atan( y/x) : M_PI + atan( y/x);//unit is Radian not angular
 	double trgLen = hypot( x, y);// compute triangle hypotenus
 
 	double* rad = (double*) malloc( sizeof( double) * 2);
 
 	rad[ THETA] 	= acos(( sq(a) + sq( trgLen) - sq(b))/(2 * a * trgLen)) + trgRad;
+
+	//printf("%ld")
 	rad[ PHI] 		= acos(( sq(a) + sq(b) - sq( trgLen))/(2 * a * b)) - M_PI;
 
+	printf("\nbend2rad(): x = %lf y = %lf a = %lf b = %lf trgRad = %lf rad[ 0] = %lf\n", x, y, a, b, trgRad, rad[0]);
 	return rad;
 }
 
