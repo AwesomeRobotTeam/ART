@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import cv2
 import sys
-sys.path.append('/home/rche/ART/ROS_wrapper/challenge3/script/module/')
+import os
+sys.path.append('/home/'+os.popen("whoami").read().strip('\n')+'/ART/ROS_wrapper/challenge3/script/module/')
 print 'Start caffe......'
 import caffe
 import numpy as np
-import os
 import argparse
 import detection as dt
 import time
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     # send the message to laser fort via ROS
     if args.ros:
-        laser = laser(10, True, 0, 0)
+        laser = laser()
         for coordinate in coordinates:
             laser.shoot1(coordinate['X-Axis'], coordinate['Y-Axis'])
         laser.shutdown() 

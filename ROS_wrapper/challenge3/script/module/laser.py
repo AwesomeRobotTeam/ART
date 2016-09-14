@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import sys
-sys.path.append("/home/rche/ART/ROS_wrapper/challenge3/src")
+import sys, os
+sys.path.append("/home/"+os.popen("whoami").read().strip('\n')+"/ART/ROS_wrapper/challenge3/src")
 import rospy
 from challenge3.msg import Laser_fort
 import tty, termios
@@ -11,7 +11,7 @@ anglePerStep = (2 * math.pi) / 2048
 
 class laser:
     #laser constructor
-    def __init__(self, distance=15, sideLength=17.6, searchTable=True, precision=5):
+    def __init__(self, distance=17, sideLength=17.6, searchTable=True, precision=1):
         self.precision = precision
         self.table = self.readTableFile('./steps.txt') if searchTable else None
         self.laser2wall = distance
@@ -29,6 +29,8 @@ class laser:
     def controlLaser(self):
         print '1. Press space to light up/down the laser.'
         print '2. Press \'q\' to exit.'
+        precision = self.precision 
+        self.precisoin = 5
         while True: 
             ch = getchar()
             if ch == '\x1b' and '[' == getchar():
@@ -49,6 +51,7 @@ class laser:
                 return
             else:
                 continue
+        self.precision = precision
 
     def calculateSteps(self, axis):
         print 'Press \'s\' to start.'
@@ -104,33 +107,38 @@ class laser:
 
     def shoot2(self, x, y, datum_point_x=7, datum_point_y=7):
         # calculate the rotate angles
-        base = abs(x-datum_point_x) * self.gridLength - (self.gridLength / 2)
-        height = abs(y-datum_point_y) * self.gridLength - (self.gridLength / 2)
+        quadrant = getQuadrant(x, y, datum_point_x, datum_point_y)
+        print 'quadrant : %d' % quadrant
+        xcoef = 1 if quadrant == 3 or quadrant == 4 else -1
+        ycoef = 1 if quadrant == 2 or quadrant == 4 else -1
+        base = abs(abs(x-datum_point_x) * self.gridLength - (xcoef * (self.gridLength / 2)))
+        height = abs(abs(y-datum_point_y) * self.gridLength - (ycoef * (self.gridLength / 2)))
         laser2target = math.sqrt(pylab.square(base) + pylab.square(height) + pylab.square(self.laser2wall))
-
-        yaw = math.asin(x / laser2target)
-        pitch = math.acos(y / laser2target)
+        print "base : %f \t height : %f" % (base, height)
+        print laser2target
+        yaw = math.asin(base / laser2target)
+        pitch = math.asin(height / laser2target)
+        print "yaw : %f \t pitch : %f" % (yaw, pitch)
         units2yaw = yaw / anglePerStep
         units2pitch = pitch / anglePerStep
-        quadrant = getQuadrant(x,y)
-        print 'quadrant : %d' % quadrant
+        
         if quadrant == 1 or quadrant == 3:
             units2yaw = -units2yaw 
         if quadrant == 3 or quadrant == 4:
             units2pitch = -units2pitch
         print 'steps to yaw %f \t steps to pitch %f' % (units2yaw, units2pitch)
-        self.move(units2yaw*self.precision, units2pitch*self.precision, 1, 3000)
+        self.move(units2yaw, units2pitch, 1, 3000)
         time.sleep(5)
         # return to the datum point
-        self.move(-units2yaw*self.precision, -units2pitch*self.precision, 1, 0)
+        self.move(-units2yaw, -units2pitch, 1, 0)
     
     def shutdown(self):
         self.move(0, 0, 0, 0)
 
-    def move(self, x, y, h, t=0):
+    def move(self, yaw, pitch, h, t=0):
         try:
             if not rospy.is_shutdown(): 
-                self.pubStepper.publish( rotsteps1 = x, rotsteps2 = y, hit = h, delay = t)
+                self.pubStepper.publish( rotsteps1 = yaw, rotsteps2 = pitch, hit = h, delay = t)
         except rospy.ROSInterruptException: 
             pass
     
@@ -159,12 +167,12 @@ def getchar():
     return ch
 
 # Return the quadrant of (x,y)
-def getQuadrant(x, y):
-    if x <= 7 and y <= 7:
+def getQuadrant(x, y, datum_point_x, datum_point_y):
+    if x <= datum_point_x and y <= datum_point_y:
         return 1
-    elif x <= 7 and y > 7:
+    elif x <= datum_point_x and y > datum_point_y:
         return 2
-    elif x > 7 and y <= 7:
+    elif x > datum_point_x and y <= datum_point_y:
         return 3
     else:
         return 4
@@ -173,7 +181,7 @@ if __name__ == '__main__':
     laser = laser()
     while True:
         coordinate = raw_input().split()
-        if coordinate[0] == 'q':
+        if coordinate[0] == "exit":
             break
         else:
             print "x : %s \t y : %s" % (coordinate[0], coordinate[1])
