@@ -16,7 +16,7 @@
 double*
 bend2rad( double x, double y, double a, double b)
 {
-	double trgRad = atan( y/x);//unit is Radian not angular
+	double trgRad = atan( y/x) > 0? atan( y/x) : M_PI + atan( y/x);//unit is Radian not angular
 	double trgLen = hypot( x, y);// compute triangle hypotenus
 
 	double* rad = (double*) malloc( sizeof( double) * 2);
@@ -33,7 +33,8 @@ coord2armrad( double x, double y , double z, double a, double b, double c)
 {
 	double* ret = (double*) malloc( sizeof( double) * 4);
 	
-	ret[ BASE] = atan( y/x);
+	///< atan = [ -PI/2 ~ PI/2] map to [ 0 ~ PI ]
+	ret[ BASE] = atan( y/x) > 0? atan( y/x) : M_PI + atan( y/x) ;
 
 	double* tmp = bend2rad( hypot( x, y) - c, z, a, b);
 

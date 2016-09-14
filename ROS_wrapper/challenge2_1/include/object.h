@@ -43,9 +43,9 @@ struct arm{
 	double l_coord[3];
 	double g_coord[3];
 
-	const float length;
-	const float width;
-	const float height;
+	const double length;
+	const double width;
+	const double height;
 };
 
 

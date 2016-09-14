@@ -20,7 +20,7 @@ int16 upperSteps
 
 #Servo can only be represented from 0 to 180
 # Wrist: Up and down rotation (Servo)
-uint16 wristAngle
+int16 wristAngle
 
 # Clip: left and right rotation angular (Servo)
-uint16 clipAngle
+int16 clipAngle
