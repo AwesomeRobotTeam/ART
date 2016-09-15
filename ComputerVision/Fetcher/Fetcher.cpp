@@ -17,7 +17,7 @@
 
 #include <boost/python.hpp>
 
-#include "opencv-ndarray-conversion/conversion.h"
+#include "opencv-ndarray-conversion0/conversion.h"
 
 struct Fetcher {
 	cv::Point p0; // Top-left point
