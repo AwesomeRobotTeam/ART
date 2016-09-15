@@ -2,6 +2,7 @@ from termcolor import colored
 
 row = 16
 col = 16
+threshold = 0.99 #the probability threshold
 
 def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
     print "Catagory table"
@@ -10,7 +11,10 @@ def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
         for j in range(col):
             if (i*col + j) < len(item_list):
                 if item_list[k]['catagory'] in targetlist:
-                    print colored("|%6.6s" % item_list[k]['catagory'], 'red') ,
+                        if item_list[k]['probability'] > threshold:   
+                            print colored("|%6.6s" % item_list[k]['catagory'], 'red') ,
+                        else:
+                            print colored("|%6.6s" % item_list[k]['catagory'], 'green') ,    
                 else:
                     print ("|%6.6s" % item_list[k]['catagory']) ,
             else:
@@ -25,7 +29,10 @@ def print_probability_table(item_list, targetlist=['cat','truck','automobile']):
         for j in range(col):
             if (i*col + j) < len(item_list):
                 if item_list[k]['catagory'] in targetlist:
-                    print colored("|%6.6s" % item_list[k]['probability'], 'red') ,
+                    if item_list[k]['probability'] > threshold:
+                        print colored("|%6.6s" % item_list[k]['probability'], 'red') ,
+                    else:
+                        print colored("|%6.6s" % item_list[k]['probability'], 'green') ,
                 else:
                     print ("|%6.6s" % item_list[k]['probability']) ,
             else:
