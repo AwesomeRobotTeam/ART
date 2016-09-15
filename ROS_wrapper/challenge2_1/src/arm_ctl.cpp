@@ -30,4 +30,8 @@ void arm_ctl( challenge2_1::Arm &msg, double x, double y, double z)
 	ROS_INFO("\nNow: Base %d, Lower %d, Upper %d, Wrist %d\n",
 		obj[BASE].cur_motor.stepper_now, obj[ LOW].cur_motor.stepper_now,
 			obj[ UP].cur_motor.stepper_now, obj[ WRIST].cur_motor.servo_now);
+
+//	arm_stepper_exit( step2rad( obj[ BASE].cur_motor.stepper_now), step2rad( obj[ LOW].cur_motor.stepper_now), step2rad( obj[ UP].cur_motor.stepper_now), 0, M_PI, -M_PI/4, M_PI * 3/4, -M_PI * 3/4, M_PI /2);
+
+	//arm_servo_exit( obj[ WRIST].cur_motor.servo_now, obj[ Clip].cur_motor.servo_now);
 }

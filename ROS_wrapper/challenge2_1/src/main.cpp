@@ -45,7 +45,7 @@ manul_assign( challenge2_1::Arm &msg)
 	double* rad = coord2armrad( tmp[0], tmp[1], tmp[2], LOWER_L, UPPER_L, WRIST_L);
 	printf("main rad x = %lf, y = %lf, z = %lf\n", rad2ang( rad[0]), rad2ang( rad[1]), rad2ang( rad[2]));
 
-	arm_ctl( msg, tmp[0] - UPPER_W - WRIST_W , tmp[1] - WRIST_L, tmp[2]);// + WRIST_H);
+	arm_ctl( msg, tmp[0] + UPPER_W - WRIST_W , tmp[1] - WRIST_L, tmp[2]);// + WRIST_H);
 
 	//Real
 	//arm_ctl( msg, tmp[0], tmp[1] - XXX, tmp[2] + XXX);
