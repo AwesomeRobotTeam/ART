@@ -21,7 +21,8 @@ batch_size = 256
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser(description='Argument Checker') 
     parser.add_argument("-v", "--video", type=int, help="set video source", default=-1)
-    parser.add_argument("-i", "--image", type=str, help="image path")
+    parser.add_argument("-d", "--directory", type=str, help="image directory path")
+    parser.add_argument("-i", "--image", type=str, help="image path", default="./collage.png")
     parser.add_argument("-gpu", "--gpu", type=int, nargs='?', const=0 , help="use gpu to forwarding the classification")
     parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./model/cifar10_predict.prototxt')
     parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./model/cifar10_predict.caffemodel')
@@ -94,19 +95,21 @@ if __name__ == '__main__':
         output = fwd.disp_preds(net, img_list, labels, transformer)
         cap.release()
         cv2.destroyAllWindows() 
-    elif args.image:
-        dirItemList = sorted(os.listdir(args.image))
+    elif args.directory:
+        dirItemList = sorted(os.listdir(args.directory))
         for i in range(batch_size):
-            input_image = caffe.io.load_image(args.image + dirItemList[i])
+            input_image = caffe.io.load_image(args.directory + dirItemList[i])
             img_list.append(input_image)
         output = fwd.disp_preds(net, img_list, labels, transformer)
     else:
-        image = cv2.imread('./collage.png')
+        image = cv2.imread(args.image)
+        image = imgp.convert(image, "resize")
         cv2.imshow('img', image)
         while cv2.waitKey(0) & 0xFF != ord('q'):
             continue
         cv2.destroyAllWindows()
         img_list = imgp.getCrops(image, 16)
+        print img_list[0].shape
         output = fwd.disp_preds(net, img_list, labels, transformer)
     tEnd = time.time()
     # show the forwarding time
