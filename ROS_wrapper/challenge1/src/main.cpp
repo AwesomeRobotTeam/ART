@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <sys/unistd.h>
+#include <sys/fcntl.h>
+
 #include "ros_api.h"
 
 #include "motor_ctl.hpp"
@@ -5,16 +9,28 @@
 #include "challenge1/trafficLight.h"
 #include "challenge1/IR_trigger.h"
 
+///< Non blcoking getch()
+#define ngetc( c) ( read ( 0, ( c), 1))
+
+#define RUN 'r'
+#define STOP	's'
+
 ///< ROS init Topic msg
 challenge1::Motor mot;
 challenge1::IR_trigger irt;
 challenge1::trafficLight traf;
 challenge1::Ultrasonic usonic;
 
+challenge1::Motor motStop;
+
 ///< Subscribe Call Back funct
 void btracker( const challenge1::IR_trigger::ConstPtr &msg);
 void trafColor( const challenge1::trafficLight::ConstPtr &msg);
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg);
+
+///<State Control
+char retKey( void);
+char* key = ( char*) malloc( sizeof( char));
 
 int main( int argc, char** argv)
 {
@@ -35,10 +51,23 @@ int main( int argc, char** argv)
 	//challenge1::trafficLight traf;
 	traf.color = 0;
 
+	///< State Control
+	fcntl( 0, F_SETFL, O_NONBLOCK);/*///< make the stdin be nonblocking*/
+	optMotor( motStop, stop);
+
 	///< while loop
 	while( ros::ok())
 	{
-		motpub.publish( mot);
+		switch( retKey()){
+			case( STOP):
+				motpub.publish( motStop);
+				break;
+			case( RUN):
+			default:
+				motpub.publish( mot);
+				break;
+		}
+
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
@@ -48,7 +77,7 @@ void trafColor( const challenge1::trafficLight::ConstPtr &msg)
 {
 	ROS_DEBUG("color = %d", (int) msg->color);
 	if( (int) msg->color == 0){
-		optMotor( mot, front0);
+		//optMotor( mot, front0);
 		ROS_DEBUG("trafColor do nothing");
 	}
 	else if( (int) msg->color == 1)
@@ -97,16 +126,39 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)
 {
-	if( 5 < ( int) msg->r_dst && ( int) msg->r_dst < 40)
-		optMotor( mot, front1);
-	else if( 5 < ( int) msg->l_dst && ( int) msg->l_dst < 40)
-		optMotor( mot, front1);
-	else if( 5 < ( int) msg->f_dst &&  ( int) msg->f_dst < 30)
+	if( 5 < ( int) msg->r_dst && ( int) msg->r_dst < 40){
+		speed_flag( 2);
+		optMotor( mot, front1);//TODO: TEMP
+	}
+	else if( 5 < ( int) msg->l_dst && ( int) msg->l_dst < 40){
+		speed_flag( 2);
+		optMotor( mot, front1);//TODO: TEMP
+	}
+	else if( 5 < ( int) msg->f_dst &&  ( int) msg->f_dst < 30){
+		speed_flag( 1);
 		optMotor( mot, stop);
-	else if( 5 < ( int) msg->rf_dst &&  ( int) msg->rf_dst < 35)
+	}
+	else if( 5 < ( int) msg->rf_dst &&  ( int) msg->rf_dst < 35){
+		speed_flag( 1);
 		optMotor( mot, stop);
-	else if(  5 < ( int) msg->lf_dst && ( int) msg->lf_dst < 35)
+	}
+	else if(  5 < ( int) msg->lf_dst && ( int) msg->lf_dst < 35){
+		speed_flag( 1);
 		optMotor( mot, stop);
+	}
 	else
-		optMotor( mot, front0);
+		optMotor( mot, front0);//TODO: TEMP
+}
+
+char retKey( void)
+{
+	memset( key, '\0', 1);
+
+	if( 0 == ngetc( key) || *key == '\n'){
+		ROS_DEBUG("Nothing key input\n");
+		return 0;
+	}
+
+	ROS_DEBUG("key = %c", *key);
+	return *key;
 }
