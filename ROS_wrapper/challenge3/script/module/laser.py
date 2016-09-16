@@ -13,7 +13,7 @@ class laser:
     #laser constructor
     def __init__(self, distance=17, sideLength=17.6, searchTable=True, precision=1):
         self.precision = precision
-        self.table = self.readTableFile('./steps.txt') if searchTable else None
+        self.table = self.readTableFile('./configure/steps.txt') if searchTable else None
         self.laser2wall = distance
         self.gridLength = sideLength / 16
         self.laser = 0
@@ -21,14 +21,12 @@ class laser:
         # ROS init start
         rospy.init_node("Center_Node")
         self.pubStepper = rospy.Publisher("Arduino_Laser_fort", Laser_fort, queue_size=10)
-        # ROS init end
-                
-        self.controlLaser()
+        # ROS init end 
 
     # laser to center
     def controlLaser(self):
-        print '1. Press space to light up/down the laser.'
-        print '2. Press \'q\' to exit.'
+        print '[System]1. Press space to light up/down the laser.'
+        print '[System]2. Press \'q\' to exit.'
         precision = self.precision 
         self.precisoin = 5
         while True: 
@@ -47,53 +45,47 @@ class laser:
                 self.laser = self.laser ^ 1
                 self.move(0, 0, self.laser)
             elif ch == 'q':
-                print 'Exit controlling.'
-                return
+                print '[System]Exit controlling.'
+                break
             else:
                 continue
         self.precision = precision
+        self.X_Axis = 0
+        self.Y_Axis = 0
+        return self.X_Axis, self.Y_Axis
 
-    def calculateSteps(self, axis):
-        print 'Press \'s\' to start.'
-        while getchar() != 's':
-            continue
-        if axis == 'X':            
-            print 'Move laser fort vertically.'
-            steps = self.measure()['X-Axis']
-            print 'x : %d' % steps
-            return steps*2
-        elif axis == 'Y':
-            print 'Move laser fort horizontally.'
-            steps = self.measure()['Y-Axis']
-            print 'y : %d' % steps  
-            return steps*2
-        else:
-            return -1
-        return 0
-
+    def getCurrentPosition(self):
+        return self.X_Axis, self.Y_Axis    
+        
+    def calculateSteps(self):
+        print "[System]Now you can move the laser. Press white spcae to record the point"
+        self.measure()
+               
     def measure(self):
-        x_moves = 0
-        y_moves = 0
+        message = ""
         while True: 
             ch = getchar()
             if ch == '\x1b' and '[' == getchar():
                 ch = getchar()
                 if ch == 'A':
-                    self.move(0, self.precision, self.laser)
-                    x_moves = x_moves + 1
+                    self.move(0, self.precision, 1)
+                    self.X_Axis = self.X_Axis + 1                    
                 elif ch == 'B':
-                    self.move(0, -self.precision, self.laser)
-                    x_moves = x_moves - 1
+                    self.move(0, -self.precision, 1)
+                    self.X_Axis = self.X_Axis - 1
                 elif ch == 'C':
-                    self.move(self.precision, 0, self.laser)
-                    y_moves = y_moves + 1
+                    self.move(self.precision, 0, 1)
+                    self.Y_Axis = self.Y_Axis + 1
                 elif ch == 'D':
-                    self.move(-self.precision, 0, self.laser)
-                    y_moves = y_moves - 1
-            elif ch == 'q':
-                return {'X-Axis':x_moves, 'Y-Axis':y_moves}
+                    self.move(-self.precision, 0, 1)
+                    self.Y_Axis = self.Y_Axis - 1
+            elif ch == ' ':
+                break
             else:
                 continue
+            message = "X:%5.1d\tY:%5.1d" % (self.X_Axis, self.Y_Axis)
+            print "\r%s" % message , 
+        print "\n[System]Save point"
 
     def shoot1(self, x, y):
         # search table
@@ -147,7 +139,7 @@ class laser:
         with open(path) as f:
             contents = f.readlines()
             if len(contents) != 256:
-                print 'File format error: less than 256 lines'
+                print '[Error]File format error: less than 256 lines'
                 return
             else:
                 for index in range(256):
@@ -179,6 +171,7 @@ def getQuadrant(x, y, datum_point_x, datum_point_y):
 
 if __name__ == '__main__':
     laser = laser()
+    laser.controlLaser()
     while True:
         coordinate = raw_input().split()
         if coordinate[0] == "exit":
