@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Argument Checker') 
     parser.add_argument("-v", "--video", type=int, help="set video source", default=-1)
     parser.add_argument("-d", "--directory", type=str, help="image directory path")
-    parser.add_argument("-i", "--image", type=str, help="image path", default="./collage.png")
+    parser.add_argument("-i", "--image", type=str, help="image path", default="./image/collage.png")
     parser.add_argument("-gpu", "--gpu", type=int, nargs='?', const=0 , help="use gpu to forwarding the classification")
     parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./model/cifar10_predict.prototxt')
     parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./model/cifar10_predict.caffemodel')
@@ -87,11 +87,11 @@ if __name__ == '__main__':
     # select input source: video, image directory or a picture
     if args.video >= 0:
         cap = cv2.VideoCapture(args.video)
-        #img_list = imgp.getRealtimeImage(cap)
-        fetcher = imgp.Image_Fetcher(cap)
-        if not fetcher.getPatch() and fetcher.patch == None:
-            sys.exit()
-        img_list = imgp.getCrops(fetcher.patch)
+        img_list = imgp.getRealtimeImage(cap)
+        #fetcher = imgp.Image_Fetcher(cap)
+        #if not fetcher.getPatch() and fetcher.patch == None:
+        #    sys.exit()
+        #img_list = imgp.getCrops(fetcher.patch)
         output = fwd.disp_preds(net, img_list, labels, transformer)
         cap.release()
         cv2.destroyAllWindows() 
@@ -109,7 +109,6 @@ if __name__ == '__main__':
             continue
         cv2.destroyAllWindows()
         img_list = imgp.getCrops(image, 16)
-        print img_list[0].shape
         output = fwd.disp_preds(net, img_list, labels, transformer)
     tEnd = time.time()
     # show the forwarding time
