@@ -40,4 +40,10 @@ arm_servo_exit( int16_t wrist, int16_t clip, int16_t wristDlim, int16_t wristUli
 	}
 }
 
+inline void
+zero_arm( challenge2_1::Arm &msg)
+{
+	msg.baseSteps = (msg.lowerSteps = (msg.upperSteps = 0));
+}
+
 #endif
