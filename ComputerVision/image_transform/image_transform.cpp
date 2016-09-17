@@ -1,10 +1,11 @@
 /*
- * Usage: ./image_transform [src_image_dir] [dst_image_dir] [offset_position] [offset_intensity]
+ * Usage: ./image_transform [src_image_dir] [dst_image_dir] [offset_position] [offset_intensity] [gaussian_kernel_size]
  *  1. (x, y) is translated with an amount between 0 and (offset_position - 1).
  *  2. The intensity is shifted with an offset between (-offset_intensity) and (offset_intensity - 1).
+ *  3. The image is blurred using a Gaussian filter with the kernel size equal to (gaussian_kernek_size * gaussian_kernel_size). The value 0 indicates no blurring.
  *
  * By Guan-Wen Lin
- * Last modified: Sep 10, 2016.
+ * Last modified: Sep 18, 2016.
  */
 
 #include <iostream>
@@ -18,12 +19,13 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 int main(int argc, char *argv[]) {
-	if (argc != 5) {
+	if (argc != 6) {
 		std::cout << "ERROR: Wrong arguments" << std::endl;
 		return -1;
 	}
 	const int OFFSET_POSITION = atoi(argv[3]);
 	const int OFFSET_INTENSITY = atoi(argv[4]);
+	const int GAUSSIAN_KERNEL_SIZE = atoi(argv[5]);
 
 	DIR *pSrcDir = opendir(argv[1]);
 	DIR *pDstDir = opendir(argv[2]);
@@ -55,6 +57,12 @@ int main(int argc, char *argv[]) {
 
 		cv::Mat src = cv::imread(ssSrc.str());
 		cv::Mat warp_dst = cv::Mat::zeros(src.rows, src.cols, src.type());
+
+
+		/// Blur the image
+
+		if (GAUSSIAN_KERNEL_SIZE != 0)
+			cv::GaussianBlur(src, src, cv::Size(GAUSSIAN_KERNEL_SIZE, GAUSSIAN_KERNEL_SIZE), 0, 0);
 
 
 		/// Change the intensity
