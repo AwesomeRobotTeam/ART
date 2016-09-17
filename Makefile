@@ -30,8 +30,8 @@ test4cpp:= test/traffic_light_test.cpp
 test5 := image_transform
 test5cpp := test/image_transform.cpp
 
-#test6 := Fetcher_v2
-#test6cpp := test/Fetcher_v2.cpp
+test6 := colorDetect
+test6cpp := test/colorDetect.cpp
 
 RMOBJ :=\
 	$(ARDO) $(test1o) $(test1)\
@@ -59,8 +59,8 @@ $(test4): $(test4cpp)
 $(test5): $(test5cpp)
 	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH)
 
-#$(test6): $(test6cpp)
-#	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH)
+$(test6): $(test6cpp)
+	$(CPP) $(CXX_FLAGS) $< -o $@ $(LDFLAGS) $(INC_PATH)
 
 clean:
 	$(RM) -f $(RMOBJ)
