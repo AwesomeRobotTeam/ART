@@ -2,9 +2,7 @@ import sys
 import os
 import cv2
 sys.path.append('/home/'+os.popen("whoami").read().strip('\n')+'/ART/ROS_wrapper/challenge3/script/module/')
-
 from laser import laser
-import fetcher
 
 line_num = 5
 
@@ -34,26 +32,14 @@ else:
 laser.table = laser.readTableFile('steps.config')
 for i in range(line_num):
     laser.shoot1(0, i)
+
+laser.center()
+print "[System]Test 4 corners"
+laser.shoot1(0, 0)
+laser.shoot1(0, 15)
+laser.shoot1(15, 0)
+laser.shoot1(15, 15)
+
 # return to center and shutdown
 laser.center()
 laser.shutdown()
-
-# image fetcher configure
-#cap = cv2.VideoCapture(0)
-#myFetcher = fetcher.Fetcher()
-#
-#while(True):
-#    # Capture frame-by-frame
-#    ret, frame = cap.read()
-#
-#    key = cv2.waitKey(1)
-#
-#    # Our operations on the frame come here
-#    fileName = myFetcher.calibrate(frame, 5, 200, key)
-#    if not fileName == "":
-#        print fileName
-#        break
-#
-## When everything done, release the capture
-#cap.release()
-#cv2.destroyAllWindows() 
