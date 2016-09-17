@@ -29,6 +29,8 @@ void optMotor( challenge1::Motor &mot, toward t)
 		}
 	}
 
+	ROS_DEBUG("speed up flag = %d", sf);
+
 	ROS_DEBUG("operateMotor(): toward = %s", toward_enumstr[t]);
 	switch( t){
 		case( front0):
@@ -59,10 +61,10 @@ void optMotor( challenge1::Motor &mot, toward t)
 			wrtMotor( mot, 0, 0, 0, 0);
 			break;
 		case( right2):
-			wrtMotor( mot, 0, 0, high, 0);
+			wrtMotor( mot, high, 0, 0, 0);
 			break;
 		case( left2):
-			wrtMotor( mot, high, 0, 0, 0);
+			wrtMotor( mot, 0, 0, high, 0);
 			break;
 		default:
 			break;
@@ -83,5 +85,5 @@ void speed_flag( int i)
 
 double ret_dur()
 {
-	return diff_time( start, end);
+	return diff_time( start, (end = get_time()));
 }

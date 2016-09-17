@@ -5,7 +5,7 @@
 #define LOW_SP  50
 
 #define SPTIME	 3
-#define SPEEDUP1 50
+#define SPEEDUP1 60
 #define SPEEDUP2 80
 
 typedef enum tow{ front0, behind0, right0, left0, front1, behind1, right1, left1, stop, right2, left2} toward;
