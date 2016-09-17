@@ -13,7 +13,9 @@ Stepper stp2(stepsPerRevolution, 11, 9, 10, 8);
 void wrtFort( const challenge3::Laser_fort &msg)
 {
    stp1.step( msg.rotsteps1);
+   delay( 100);
    stp2.step( msg.rotsteps2);
+   delay( 100);
    digitalWrite( lacer, msg.hit);
    if( msg.delay != 0)
      delay( msg.delay);
