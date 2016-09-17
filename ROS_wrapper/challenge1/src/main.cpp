@@ -29,8 +29,8 @@ void trafColor( const challenge1::trafficLight::ConstPtr &msg);
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg);
 
 ///<State Control
-char retKey( void);
-char* key = ( char*) malloc( sizeof( char));
+bool retKey( void);
+char* const key = ( char*) malloc( sizeof( char));
 
 int main( int argc, char** argv)
 {
@@ -55,10 +55,15 @@ int main( int argc, char** argv)
 	fcntl( 0, F_SETFL, O_NONBLOCK);/*///< make the stdin be nonblocking*/
 	optMotor( motStop, stop);
 
+	char tmpc = 'r';
+
 	///< while loop
 	while( ros::ok())
 	{
-		switch( retKey()){
+		if( retKey())
+			tmpc = *key;
+
+		switch( tmpc){
 			case( STOP):
 				motpub.publish( motStop);
 				break;
@@ -67,6 +72,7 @@ int main( int argc, char** argv)
 				motpub.publish( mot);
 				break;
 		}
+		
 
 		ros::spinOnce();
 		loop_rate.sleep();
@@ -120,6 +126,12 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 		optMotor( mot, left0);
 	else if( ( int) msg->trig_c == 1)
 		optMotor( mot, front0);
+	/*avoid to be out of boundary*/
+	else if( ( int) msg->trig_rrr == 1)
+		optMotor( mot, left2);
+	else if( ( int) msg->trig_lll == 1)
+		optMotor( mot, right2);
+	/**/
 	//else
 		//optMotor( mot, front0);
 }
@@ -150,15 +162,17 @@ void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)
 		optMotor( mot, front0);//TODO: TEMP
 }
 
-char retKey( void)
+bool retKey( void)
 {
 	memset( key, '\0', 1);
 
-	if( 0 == ngetc( key) || *key == '\n'){
+	ssize_t size;
+
+	if( (size = ngetc( key)) < 0 || *key == '\n'){
 		ROS_DEBUG("Nothing key input\n");
-		return 0;
+		return false;
 	}
 
-	ROS_DEBUG("key = %c", *key);
-	return *key;
+	ROS_DEBUG("key = %c, size = %zd", *key, size);
+	return true;
 }
