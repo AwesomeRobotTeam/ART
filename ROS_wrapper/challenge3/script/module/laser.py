@@ -13,10 +13,12 @@ class laser:
     #laser constructor
     def __init__(self, distance=17, sideLength=17.6, searchTable=True, precision=1):
         self.precision = precision
-        self.table = self.readTableFile('./configure/steps.txt') if searchTable else None
+        self.table = self.readTableFile('./configure/steps.config') if searchTable else None
         self.laser2wall = distance
         self.gridLength = sideLength / 16
-        self.laser = 0
+        self.laser = 1
+        self.X_Axis = 0
+        self.Y_Axis = 0
         
         # ROS init start
         rospy.init_node("Center_Node")
@@ -59,10 +61,11 @@ class laser:
         
     def calculateSteps(self):
         print "[System]Now you can move the laser. Press white spcae to record the point"
-        self.measure()
+        return self.measure()
                
     def measure(self):
-        message = ""
+        message = "X:%5.1d\tY:%5.1d" % (self.X_Axis, self.Y_Axis)
+        print "\r%s" % message , 
         while True: 
             ch = getchar()
             if ch == '\x1b' and '[' == getchar():
@@ -86,16 +89,17 @@ class laser:
             message = "X:%5.1d\tY:%5.1d" % (self.X_Axis, self.Y_Axis)
             print "\r%s" % message , 
         print "\n[System]Save point"
+        return self.X_Axis, self.Y_Axis
 
     def shoot1(self, x, y):
         # search table
         index = x * 16 + y
-        print str(self.table[index]['X-Axis']*self.precision) + '   ' + str(self.table[index]['Y-Axis']*self.precision)
+        print str(self.table[index]['X-Axis']) + '   ' + str(self.table[index]['Y-Axis'])
         # the process must wait for seconds until laser daley completed, otherwise the system will get error result
-        self.move(self.table[index]['Y-Axis']*self.precision, self.table[index]['X-Axis']*self.precision, 1, 3000)
-        time.sleep(5)
+        self.move(self.table[index]['Y-Axis'], self.table[index]['X-Axis'], 1, 3000)
+        time.sleep(4)
         #return to the datum point
-        self.move(-self.table[index]['Y-Axis']*self.precision, -self.table[index]['X-Axis']*self.precision, 1, 0)
+        self.move(-self.table[index]['Y-Axis'], -self.table[index]['X-Axis'], 1, 0)
 
     def shoot2(self, x, y, datum_point_x=7, datum_point_y=7):
         # calculate the rotate angles
@@ -123,6 +127,9 @@ class laser:
         time.sleep(5)
         # return to the datum point
         self.move(-units2yaw, -units2pitch, 1, 0)
+
+    def center(self):
+        self.move(-self.Y_Axis, -self.X_Axis, 1, 0)
     
     def shutdown(self):
         self.move(0, 0, 0, 0)
