@@ -5,45 +5,21 @@ import signal
 import os
 import caffe
 
-class Image_Fetcher:
-    def __init__(self, cap, key=1):
-        self.cap = cap
-        self.key = key
-        self.patch = None
-        self.myFetcher = fetcher.Fetcher()
-        signal.signal(signal.SIGTSTP, self.handler)
+myFetcher = fetcher.Fetcher()
+myFetcher.init("./configure/calibration_data.out")
 
-    def handler(self, signal, frame):
-        self.key = 27
-
-    def getPatch(self):
-        while(True):
-            # Capture frame-by-frame
-            ret, frame = self.cap.read()
-            cv2.waitKey(1)
-            if self.myFetcher.calibrate(frame, self.key):    
-                self.key = 1
-                break
-            self.key = 1
-        while(True):
-            # Capture frame-by-frame
-            ret, frame = self.cap.read() 
-            cv2.waitKey(1)
-            if self.key == 27:
-                break
-            self.patch = self.myFetcher.segment(frame) 
-        cv2.destroyAllWindows()
-        return True
-
-def getRealtimeImage(cap):
-    patch = onlySquare(cap)
+def getRealtimeImage(cap, autostretch=False):
+    if autostretch:
+        patch = getPatch(cap)
+    else:
+        patch = onlySquare(cap)
     #padding or resize
-    patch = convert(patch,'resize')
+    if not patch.shape == (512, 512, 3):
+        patch = convert(patch,'resize')
     #get crops
     img_list = getCrops(patch, 16)
     #cv2.imwrite('test.jpg', constant)
     return img_list
-
 
 def convert(patch, method):
     height, width, depth = patch.shape
@@ -55,6 +31,16 @@ def convert(patch, method):
     elif method == 'resize':
         length = 512
         return cv2.resize(patch, (length,length))
+
+def getPatch(cap):
+    #global myFetcher
+    while True:
+        ret, frame = cap.read()
+        patch = myFetcher.segment(frame)
+        cv2.imshow('img',patch)
+        if cv2.waitKey(1) & 0xFF == ord('q'):  
+            return patch
+
 
 def onlySquare(cap):
     while True:

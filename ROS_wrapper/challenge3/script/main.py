@@ -87,11 +87,7 @@ if __name__ == '__main__':
     # select input source: video, image directory or a picture
     if args.video >= 0:
         cap = cv2.VideoCapture(args.video)
-        img_list = imgp.getRealtimeImage(cap)
-        #fetcher = imgp.Image_Fetcher(cap)
-        #if not fetcher.getPatch() and fetcher.patch == None:
-        #    sys.exit()
-        #img_list = imgp.getCrops(fetcher.patch)
+        img_list = imgp.getRealtimeImage(cap, False)
         output = fwd.disp_preds(net, img_list, labels, transformer)
         cap.release()
         cv2.destroyAllWindows() 
