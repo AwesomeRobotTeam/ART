@@ -2,7 +2,7 @@ from termcolor import colored
 
 row = 16
 col = 16
-threshold = 0.99 #the probability threshold
+threshold = 0.90 #the probability threshold
 
 def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
     print "Catagory table"
@@ -49,12 +49,27 @@ def get_coordinates(item_list, targetlist=['cat','truck','automobile'], num=10):
         if item['catagory'] in targetlist:
             targets.append(item)
     targets = sorted(targets, key = lambda x : x['probability'], reverse=True)
-    coordinates = list(get_coordinate(target['index']) for target in targets[:num])
+    targets = select_candidates(targets)
+    coordinates = list(get_coordinate(target['index']) for target in targets)
     print [coordinate for coordinate in coordinates]
     return coordinates
 
-def select_coordinates(candidates, num=10):
+def select_candidates(candidates, num=10):
+    bp = None
+    seeds = None
+    # get only first 10 objects 
     if len(candidates) > num:
-        return candidates[:num]
-    else:
+        candidates = candidates[:num]
+    # add threshold
+    for index in range(len(candidates)):
+        if candidates[index]['probability'] < threshold:
+            seeds = candidates[:index]
+            bp = index
+            break
+    if bp is None:
         return candidates
+    # special case select
+    for candidate in candidates[bp:]:
+        if candidate['catagory'] == 'cat':
+            seeds.insert(0, candidate)
+    return seeds
