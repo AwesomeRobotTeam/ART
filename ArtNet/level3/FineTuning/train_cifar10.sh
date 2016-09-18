@@ -6,8 +6,9 @@ TOOLS=~/caffe/build/tools
 DBTYPE=leveldb
 SRC_DIRECTORY=~/Collage/test/
 DEST_DIRECTORY=./Collage/
-POSITION=5
+POSITION=2
 INTENSITY=100
+flur=3
 
 #make the destination directory if it doesn't exist
 if [ ! -d ${DEST_DIRECTORY} ]; then
@@ -17,43 +18,43 @@ fi
 # transform image
 if [ ! -d ${DEST_DIRECTORY}airplane/ ]; then
   mkdir ${DEST_DIRECTORY}airplane
-  ./image_transform ${SRC_DIRECTORY}airplane/ ${DEST_DIRECTORY}airplane/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}airplane/ ${DEST_DIRECTORY}airplane/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}automobile/ ]; then
   mkdir ${DEST_DIRECTORY}automobile
-  ./image_transform ${SRC_DIRECTORY}automobile/ ${DEST_DIRECTORY}automobile/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}automobile/ ${DEST_DIRECTORY}automobile/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}bird/ ]; then
   mkdir ${DEST_DIRECTORY}bird
-  ./image_transform ${SRC_DIRECTORY}bird/ ${DEST_DIRECTORY}bird/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}bird/ ${DEST_DIRECTORY}bird/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}cat/ ]; then
   mkdir ${DEST_DIRECTORY}cat
-  ./image_transform ${SRC_DIRECTORY}cat/ ${DEST_DIRECTORY}cat/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}cat/ ${DEST_DIRECTORY}cat/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}deer/ ]; then
   mkdir ${DEST_DIRECTORY}deer
-  ./image_transform ${SRC_DIRECTORY}deer/ ${DEST_DIRECTORY}deer/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}deer/ ${DEST_DIRECTORY}deer/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}dog/ ]; then
   mkdir ${DEST_DIRECTORY}dog
-  ./image_transform ${SRC_DIRECTORY}dog/ ${DEST_DIRECTORY}dog/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}dog/ ${DEST_DIRECTORY}dog/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}frog/ ]; then
   mkdir ${DEST_DIRECTORY}frog
-  ./image_transform ${SRC_DIRECTORY}frog/ ${DEST_DIRECTORY}frog/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}frog/ ${DEST_DIRECTORY}frog/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}horse/ ]; then
   mkdir ${DEST_DIRECTORY}horse
-  ./image_transform ${SRC_DIRECTORY}horse/ ${DEST_DIRECTORY}horse/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}horse/ ${DEST_DIRECTORY}horse/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}ship/ ]; then
   mkdir ${DEST_DIRECTORY}ship
-  ./image_transform ${SRC_DIRECTORY}ship/ ${DEST_DIRECTORY}ship/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}ship/ ${DEST_DIRECTORY}ship/ ${POSITION} ${INTENSITY} ${flur}
 fi
 if [ ! -d ${DEST_DIRECTORY}truck/ ]; then
   mkdir ${DEST_DIRECTORY}truck
-  ./image_transform ${SRC_DIRECTORY}truck/ ${DEST_DIRECTORY}truck/ ${POSITION} ${INTENSITY}
+  ./image_transform ${SRC_DIRECTORY}truck/ ${DEST_DIRECTORY}truck/ ${POSITION} ${INTENSITY} ${flur}
 fi
 
 # create train.txt and test.tx
