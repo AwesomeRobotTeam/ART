@@ -11,6 +11,7 @@ import time
 import detection as dt
 import ImageProcessor as imgp
 import forwarding as fwd
+import SaveRealImage as sri
 from laser import laser
 
 caffe_root = '/home/' + os.popen("whoami").read().strip('\n') +'/caffe/'
@@ -23,11 +24,12 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--video", type=int, help="set video source", default=-1)
     parser.add_argument("-d", "--directory", type=str, help="image directory path")
     parser.add_argument("-i", "--image", type=str, help="image path", default="./image/collage.png")
-    parser.add_argument("-gpu", "--gpu", type=int, nargs='?', const=0 , help="use gpu to forwarding the classification")
+    parser.add_argument("-g", "--gpu", type=int, nargs='?', const=0, help="use gpu to forwarding the classification")
     parser.add_argument("-n", "--net", type=str, help="the path of net definition file", default='./model/cifar10_predict.prototxt')
     parser.add_argument("-w", "--weight", type=str, help="the path of trained weight file", default='./model/cifar10_predict.caffemodel')
     parser.add_argument("-l", "--label", type=str, help="the path of label file", default='./model/label.txt')
     parser.add_argument("-m", "--mean", type=str, help="the path of mean file", default='./model/mean.npy')
+    parser.add_argument("-s", "--save", type=bool, nargs='?', const=True, help="if save the video snapshots or not")
     parser.add_argument("-r", "--ros", type=str, nargs='?', const=True, help="run with ROS")
     args = parser.parse_args()
 
@@ -87,7 +89,7 @@ if __name__ == '__main__':
     # select input source: video, image directory or a picture
     if args.video >= 0:
         cap = cv2.VideoCapture(args.video)
-        img_list = imgp.getRealtimeImage(cap, False)
+        img_list = imgp.getRealtimeImage(cap, True)
         output = fwd.disp_preds(net, img_list, labels, transformer)
         cap.release()
         cv2.destroyAllWindows() 
@@ -117,6 +119,16 @@ if __name__ == '__main__':
     # get targets coordinates 
     coordinates = dt.get_coordinates(output)
 
+    # save video snapshots
+    if args.save:
+        images = list()
+        images_name = sorted(os.listdir('/tmp/crops/'))
+        for image_name in images_name:
+            tmp = cv2.imread('/tmp/crops/' + image_name)
+            images.append(cv2.imread('/tmp/crops/' + image_name))
+        sri.saveImage(images)
+        del images, images_path
+            
     # send the message to laser fort via ROS
     if args.ros:
         laser = laser()
