@@ -34,38 +34,38 @@ void optMotor( challenge1::Motor &mot, toward t)
 	ROS_DEBUG("operateMotor(): toward = %s", toward_enumstr[t]);
 	switch( t){
 		case( front0):
-			wrtMotor( mot, low, 0, low, 0);
+			wrtMotor( mot, low, 0, low * SP_TOR, 0);
 			break;
 		case( front1):
-			wrtMotor( mot, high, 0, high, 0);
+			wrtMotor( mot, high, 0, high * SP_TOR, 0);
 			break;
 		case( behind0):
-			wrtMotor( mot, 0, low, 0, low);
+			wrtMotor( mot, 0, low, 0, low * SP_TOR);
 			break;
 		case( behind1):
-			wrtMotor( mot, 0, high, 0, high);
+			wrtMotor( mot, 0, high, 0, high * SP_TOR);
 			break;
 		case( right0):
-			wrtMotor( mot, 0, low, low, 0);
+			wrtMotor( mot, 0, low, low * SP_TOR, 0);
 			break;
 		case( right1):
-			wrtMotor( mot, 0, high, high, 0);
+			wrtMotor( mot, 0, high, high * SP_TOR, 0);
 			break;
 		case( left0):
 			wrtMotor( mot, low, 0, 0, low);
 			break;
 		case( left1):
-			wrtMotor( mot, high, 0, 0, high);
+			wrtMotor( mot, high, 0, 0, high * SP_TOR);
 			break;
 		case( stop):
 			wrtMotor( mot, 0, 0, 0, 0);
 			break;
-		case( right2):
-			wrtMotor( mot, high, 0, 0, 0);
+		/*case( right2):
+			wrtMotor( mot, high , 0, 0, 0);
 			break;
 		case( left2):
-			wrtMotor( mot, 0, 0, high, 0);
-			break;
+			wrtMotor( mot, 0, 0, high * SP_TOR, 0);
+			break;*/
 		default:
 			break;
 	}

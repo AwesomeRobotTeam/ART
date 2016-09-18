@@ -128,9 +128,9 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 		optMotor( mot, front0);
 	/*avoid to be out of boundary*/
 	else if( ( int) msg->trig_rrr == 1)
-		optMotor( mot, left2);
+		optMotor( mot, right0);
 	else if( ( int) msg->trig_lll == 1)
-		optMotor( mot, right2);
+		optMotor( mot, left0);
 	/**/
 	//else
 		//optMotor( mot, front0);
@@ -138,23 +138,23 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)
 {
-	if( 5 < ( int) msg->r_dst && ( int) msg->r_dst < 40){
+	if( 0.5 < ( int) msg->r_dst && ( int) msg->r_dst < 20){
 		speed_flag( 2);
 		optMotor( mot, front1);//TODO: TEMP
 	}
-	else if( 5 < ( int) msg->l_dst && ( int) msg->l_dst < 40){
+	else if( 0.5 < ( int) msg->l_dst && ( int) msg->l_dst < 20){
 		speed_flag( 2);
 		optMotor( mot, front1);//TODO: TEMP
 	}
-	else if( 5 < ( int) msg->f_dst &&  ( int) msg->f_dst < 30){
+	else if( 0.5 < ( int) msg->f_dst &&  ( int) msg->f_dst < 20){
 		speed_flag( 1);
 		optMotor( mot, stop);
 	}
-	else if( 5 < ( int) msg->rf_dst &&  ( int) msg->rf_dst < 35){
+	else if( 0.5 < ( int) msg->rf_dst &&  ( int) msg->rf_dst < 25){
 		speed_flag( 1);
 		optMotor( mot, stop);
 	}
-	else if(  5 < ( int) msg->lf_dst && ( int) msg->lf_dst < 35){
+	else if( 0.5 < ( int) msg->lf_dst && ( int) msg->lf_dst < 25){
 		speed_flag( 1);
 		optMotor( mot, stop);
 	}
