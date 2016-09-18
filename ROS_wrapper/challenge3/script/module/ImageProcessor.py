@@ -1,5 +1,4 @@
 import cv2
-#import fetcher as fetcher
 import fetcher
 import signal
 import os
@@ -10,15 +9,15 @@ myFetcher.init("./configure/calibration_data.out")
 
 def getRealtimeImage(cap, autostretch=False):
     if autostretch:
-        patch = getPatch(cap)
+        patch = getStretch(cap)
     else:
         patch = onlySquare(cap)
+    cv2.imwrite("patch.jpg", patch)
     #padding or resize
     if not patch.shape == (512, 512, 3):
         patch = convert(patch,'resize')
     #get crops
     img_list = getCrops(patch, 16)
-    #cv2.imwrite('test.jpg', constant)
     return img_list
 
 def convert(patch, method):
@@ -32,12 +31,12 @@ def convert(patch, method):
         length = 512
         return cv2.resize(patch, (length,length))
 
-def getPatch(cap):
-    #global myFetcher
+def getStretch(cap):
     while True:
         ret, frame = cap.read()
         patch = myFetcher.segment(frame)
         cv2.imshow('img',patch)
+        cv2.imshow('square', cv2.resize(frame[:,80:560,:], (512,512)))
         if cv2.waitKey(1) & 0xFF == ord('q'):  
             return patch
 
@@ -66,7 +65,7 @@ def getCrops(img, num=16):
     for i in range(num):
         for j in range(num):
             crop_img = img[i*crop_height : ((i+1) * crop_height) , j * crop_width: ((j+1) * crop_width), :]
-            cv2.imwrite('/tmp/crops/img'+get2digits(i)+get2digits(j)+'.jpg', crop_img)
+            cv2.imwrite('/tmp/crops/img'+get2digits(i)+get2digits(j)+'.jpg', crop_img)    
     dirItemList = sorted(os.listdir('/tmp/crops/'))
     for i in range(len(dirItemList)):
         input_image = caffe.io.load_image('/tmp/crops/' + dirItemList[i])
