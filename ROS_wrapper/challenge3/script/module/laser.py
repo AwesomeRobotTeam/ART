@@ -11,9 +11,10 @@ anglePerStep = (2 * math.pi) / 2048
 
 class laser:
     #laser constructor
-    def __init__(self, distance=17, sideLength=17.6, searchTable=True, precision=1):
+    def __init__(self, distance=10, sideLength=10, searchTable=False, precision=1):
         self.precision = precision
-        self.table = self.readTableFile('./configure/steps.config') if searchTable else None
+        if searchTable:
+            self.table = self.readTableFile('./configure/steps.config') if searchTable else None
         self.laser2wall = distance
         self.gridLength = sideLength / 16
         self.laser = 1
@@ -28,9 +29,8 @@ class laser:
     # laser to center
     def controlLaser(self):
         print '[System]1. Press space to light up/down the laser.'
-        print '[System]2. Press \'q\' to exit.'
-        precision = self.precision 
-        self.precisoin = 5
+        print '[System]2.Press \'s\' to start.'
+        print '[System]3. Press \'q\' to exit.'
         while True: 
             ch = getchar()
             if ch == '\x1b' and '[' == getchar():
@@ -46,12 +46,13 @@ class laser:
             elif ch == ' ':
                 self.laser = self.laser ^ 1
                 self.move(0, 0, self.laser)
-            elif ch == 'q':
-                print '[System]Exit controlling.'
+            elif ch == 's':
+                print '[System]Start controlling.'
                 break
+            elif ch == 'q':
+                sys.exit()
             else:
                 continue
-        self.precision = precision
         self.X_Axis = 0
         self.Y_Axis = 0
         return self.X_Axis, self.Y_Axis
@@ -72,18 +73,20 @@ class laser:
                 ch = getchar()
                 if ch == 'A':
                     self.move(0, self.precision, 1)
-                    self.X_Axis = self.X_Axis + 1                    
+                    self.X_Axis = self.X_Axis + self.precision                    
                 elif ch == 'B':
                     self.move(0, -self.precision, 1)
-                    self.X_Axis = self.X_Axis - 1
+                    self.X_Axis = self.X_Axis - self.precision
                 elif ch == 'C':
                     self.move(self.precision, 0, 1)
-                    self.Y_Axis = self.Y_Axis + 1
+                    self.Y_Axis = self.Y_Axis + self.precision
                 elif ch == 'D':
                     self.move(-self.precision, 0, 1)
-                    self.Y_Axis = self.Y_Axis - 1
+                    self.Y_Axis = self.Y_Axis - self.precision
             elif ch == ' ':
                 break
+            elif ch == 'q':
+                sys.exit()
             else:
                 continue
             message = "X:%5.1d\tY:%5.1d" % (self.X_Axis, self.Y_Axis)
