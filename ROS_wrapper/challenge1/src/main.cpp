@@ -8,6 +8,7 @@
 #include "challenge1/Ultrasonic.h"
 #include "challenge1/trafficLight.h"
 #include "challenge1/IR_trigger.h"
+#include "challenge1/Road.h"
 
 ///< Non blcoking getch()
 #define ngetc( c) ( read ( 0, ( c), 1))
@@ -20,6 +21,7 @@ challenge1::Motor mot;
 challenge1::IR_trigger irt;
 challenge1::trafficLight traf;
 challenge1::Ultrasonic usonic;
+challenge1::Road	rd;
 
 challenge1::Motor motStop;
 
@@ -27,6 +29,7 @@ challenge1::Motor motStop;
 void btracker( const challenge1::IR_trigger::ConstPtr &msg);
 void trafColor( const challenge1::trafficLight::ConstPtr &msg);
 void avoidance( const challenge1::Ultrasonic::ConstPtr &msg);
+void rddirect( const challenge1::Road::ConstPtr &msg);
 
 ///<State Control
 bool retKey( void);
@@ -46,6 +49,7 @@ int main( int argc, char** argv)
 	r_newSub( irtsub, hdl, Arduino_IR_trigger, 1000, btracker);
 	r_newSub( trafsub, hdl, traf_color, 1000, trafColor);
 	r_newSub( usonicsub, hdl, Arduino_Ultrasonic, 1000, avoidance);
+	r_newSub( roadsub, hdl, Road, 1000, rddirect);
 
 	///< Msg init
 	//challenge1::trafficLight traf;
@@ -76,6 +80,25 @@ int main( int argc, char** argv)
 
 		ros::spinOnce();
 		loop_rate.sleep();
+	}
+}
+
+void rddirect( const challenge1::Road::ConstPtr &msg)
+{
+	ROS_DEBUG("direction = %d", (int) msg->direction);
+
+	switch( ( int) msg->direction){
+		case( 0):
+			optMotor( mot, front0);
+			break;
+		case( 1):
+			optMotor( mot, right0);
+			break;
+		case( 2):
+			optMotor( mot, left0);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -158,8 +181,8 @@ void avoidance( const challenge1::Ultrasonic::ConstPtr &msg)
 		speed_flag( 1);
 		optMotor( mot, stop);
 	}
-	else
-		optMotor( mot, front0);//TODO: TEMP
+	/*else
+		optMotor( mot, front0);//TODO: TEMP*/
 }
 
 bool retKey( void)

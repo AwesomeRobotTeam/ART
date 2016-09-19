@@ -46,3 +46,6 @@ target_link_libraries(center_node motor_ctl)
 
 rosbuild_add_executable( detectTraffic src/traffic_light_test.cpp)
 target_link_libraries(detectTraffic opencv_core opencv_highgui opencv_imgproc opencv_videostab)
+
+rosbuild_add_executable( detectRoad src/line_follower.cpp)
+target_link_libraries( detectRoad opencv_core opencv_highgui opencv_imgproc opencv_videostab)
