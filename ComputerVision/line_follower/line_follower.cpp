@@ -1,5 +1,5 @@
 /*
- * Preferred parameters: -v 0 -s 2 -o 50 -a 60 -t 60 -r 10
+ * Preferred parameters: -v 0 -s 3 -o -100 -a 60 -t 200 -r 20
  *
  * By Guan-Wen Lin
  * Last modified: Sep 19, 2016.
@@ -22,12 +22,17 @@ bool myCompFunc(cv::Vec2f a, cv::Vec2f b) {
 	return a[0] < b[0];
 }
 
-cv::Mat detectRoad(cv::Mat segmentedInputFrame, int offset, int angle) {
+cv::Mat detectRoad(cv::Mat &segmentedInputFrame, int offset, int angle) {
+	// Sharpen segmentedInputFrame
+	cv::Mat blurredSegmentedInputFrame;
+	cv::GaussianBlur(segmentedInputFrame, blurredSegmentedInputFrame, cv::Size(0, 0), 3);
+	cv::addWeighted(segmentedInputFrame, 1.5, blurredSegmentedInputFrame, -0.5, 0, segmentedInputFrame);
+
 	cv::Mat edges;
-	cv::Canny(segmentedInputFrame, edges, 50, 200, 3);
+	cv::Canny(segmentedInputFrame, edges, 30, 150, 3);
 
 	std::vector<cv::Vec2f> lines;
-	cv::HoughLines(edges, lines, 1, 3 * CV_PI / 180, 100, 0, 0);
+	cv::HoughLines(edges, lines, 1, 3 * CV_PI / 180, 80, 0, 0);
 
 	// Sort lines by rho in ascending order
 	std::sort(lines.begin(), lines.end(), myCompFunc);
@@ -45,7 +50,7 @@ cv::Mat detectRoad(cv::Mat segmentedInputFrame, int offset, int angle) {
 		double x0 = a * rho, y0 = b * rho;
 		cv::Point pt1(cvRound(x0 + 1000 * (-b)), cvRound(y0 + 1000 * a));
 		cv::Point pt2(cvRound(x0 - 1000 * (-b)), cvRound(y0 - 1000 * a));
-		cv::line(road, pt1, pt2, cv::Scalar(255), 1, CV_AA);
+		cv::line(road, pt1, pt2, cv::Scalar(51), 1, CV_AA);
 	}
 
 	return road;
@@ -130,6 +135,9 @@ int main(int argc, char *argv[]) {
 	cv::namedWindow("Video Captured");
 	cv::namedWindow("Road Detected");
 
+	int inputFrameCount = 0;
+	cv::Mat avgRoad;
+
 	int imgCenter = myVideoCapture.get(CV_CAP_PROP_FRAME_WIDTH) / 2;
 	int preCenter = imgCenter;
 	int movingDirection = GO_STRAIGHT;
@@ -145,15 +153,25 @@ int main(int argc, char *argv[]) {
 		// Detect road. In general, there are only vertical lines
 		cv::Mat road = detectRoad(segmentedInputFrame, OFFSET, ANGLE);
 
+		if (inputFrameCount == 0)
+			road.copyTo(avgRoad);
+		else
+			avgRoad += road;
+		if ((++inputFrameCount) < 5)
+			continue;
+		else
+			inputFrameCount = 0;
+
 		// Compute the road center
-		int curCenter = computeCenter(road);
+		int curCenter = computeCenter(avgRoad);
+		cv::circle(avgRoad, cv::Point(curCenter, segmentedInputFrame.rows / 2), 3, cv::Scalar(255), -1);
 
 		// Compute the moving direction
 		movingDirection = computeMovingDirection(imgCenter, preCenter, curCenter, movingDirection, THRESHOLD, RESOLUTION);
 		std::cout << movingDirection << std::endl;
 
 		cv::imshow("Video Captured", segmentedInputFrame);
-		cv::imshow("Road Detected", road);
+		cv::imshow("Road Detected", avgRoad);
 	}
 
 	return 0;
