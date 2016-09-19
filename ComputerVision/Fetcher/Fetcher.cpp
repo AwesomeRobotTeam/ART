@@ -5,7 +5,7 @@
  * Reference: https://github.com/yati-sagade/opencv-ndarray-conversion
  *
  * By Guan-Wen Lin
- * Last modified: Sep 15, 2016.
+ * Last modified: Sep 19, 2016.
  */
 
 #include <iostream>
@@ -19,6 +19,8 @@
 
 #include "opencv-ndarray-conversion/conversion.h"
 
+#define USING_MOUSE
+
 struct Fetcher {
 	cv::Point p0; // Top-left point
 	cv::Point p1; // Top-right point
@@ -27,6 +29,8 @@ struct Fetcher {
 
 	cv::Point topLeftPt, bottomRightPt;
 	cv::Mat warp_mat;
+
+	int cornerCount, clickCount;
 
 	void init(char *fileName) {
 		std::fstream file;
@@ -49,6 +53,25 @@ struct Fetcher {
 		file.close();
 	}
 
+	void setPt(int x, int y, int cornerNumber) {
+		switch (cornerNumber) {
+			case 0:
+				p0 = cv::Point(x, y);
+				break;
+			case 1:
+				p1 = cv::Point(x, y);
+				break;
+			case 2:
+				p2 = cv::Point(x, y);
+				break;
+			case 3:
+				p3 = cv::Point(x, y);
+		}
+		clickCount = cornerNumber + 1;
+
+		std::cout << "p" << cornerNumber << ": " << cv::Point(x, y) << std::endl;
+	}
+
 	std::string calibrate(PyObject *_inputFrame_BGR, int blockSize, int thresh, int key) {
 		NDArrayConverter cvt;
 		cv::Mat inputFrame_BGR = cvt.toMat(_inputFrame_BGR);
@@ -62,7 +85,9 @@ struct Fetcher {
 		cv::Mat cornerResponses_norm;
 		cv::normalize(cornerResponses, cornerResponses_norm, 0, 255, cv::NORM_MINMAX);
 
-		int cornerCount = 0;
+		cornerCount = 0;
+#ifndef USING_MOUSE
+		clickCount = 0;
 		bool isFailed = false;
 		for (int i = 10; i < cornerResponses_norm.rows - 10; i++) {
 			if (isFailed)
@@ -87,8 +112,8 @@ struct Fetcher {
 				}
 			}
 		}
-
-		if (cornerCount == 4) {
+#endif
+		if (cornerCount == 4 || clickCount == 4) {
 			cv::circle(inputFrame_BGR, p0, 5, cv::Scalar(0, 0, 255));
 			cv::circle(inputFrame_BGR, p1, 5, cv::Scalar(0, 0, 255));
 			cv::circle(inputFrame_BGR, p2, 5, cv::Scalar(0, 0, 255));
@@ -138,8 +163,6 @@ struct Fetcher {
 			}
 		}
 
-		cv::imshow("Video Captured", inputFrame_BGR);
-
 		return "";
 	}
 
@@ -173,6 +196,7 @@ BOOST_PYTHON_MODULE(fetcher) {
 	init();
 	boost::python::class_<Fetcher>("Fetcher")
 		.def("init", &Fetcher::init)
+		.def("setPt", &Fetcher::setPt)
 		.def("calibrate", &Fetcher::calibrate)
 		.def("segment", &Fetcher::segment)
 		;
