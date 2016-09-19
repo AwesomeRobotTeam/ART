@@ -29,8 +29,8 @@ void setup()
 {
   pinMode( lacer, OUTPUT);
   // set the speed at 60 rpm:
-  stp1.setSpeed(5);
-  stp2.setSpeed(5);
+  //stp1.setSpeed(5);
+  //stp2.setSpeed(5);
   // initialize the serial port:
   //Serial.begin(57600);
   
