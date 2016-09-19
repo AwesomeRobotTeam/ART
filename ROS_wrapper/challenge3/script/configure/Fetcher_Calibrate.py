@@ -8,7 +8,6 @@ key = 1
 def handler(signal, frame):
     global key
     key = 27
-    print "key %d" % key
 
 if len(sys.argv) < 3:
     print "need argument for video and blocksize"
@@ -20,7 +19,6 @@ signal.signal(signal.SIGTSTP, handler)
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
-    print key
     cv2.waitKey(1)
 
     # Our operations on the frame come here
