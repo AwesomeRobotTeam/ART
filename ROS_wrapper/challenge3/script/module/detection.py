@@ -2,31 +2,36 @@ from termcolor import colored
 
 row = 16
 col = 16
+k2color = 'blue'
 threshold = 0.90 #the probability threshold
 
 def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
     print "Catagory table"
-    k = 0
+    k = -1
     for i in range(row):
         for j in range(col):
+            k = k + 1 
             if (i*col + j) < len(item_list):
                 if item_list[k]['catagory'] in targetlist:
-                        if item_list[k]['probability'] > threshold:   
-                            print colored("|%6.6s" % item_list[k]['catagory'], 'red') ,
-                        else:
-                            print colored("|%6.6s" % item_list[k]['catagory'], 'green') ,    
+                    if item_list[k]['probability'] > threshold:
+                        print colored("|%6.6s" % item_list[k]['catagory'], 'red') ,
+                    else:
+                        print colored("|%6.6s" % item_list[k]['catagory'], 'green') ,
                 else:
-                    print ("|%6.6s" % item_list[k]['catagory']) ,
+                    if item_list[k]['catagory2'] in targetlist:
+                        print colored("|%6.6s" % item_list[k]['catagory'], k2color) ,
+                    else:
+                        print ("|%6.6s" % item_list[k]['catagory']) ,
             else:
                 print ("|%6.6s" % 'x') ,
-            k = k + 1
         print "|"
 
 def print_probability_table(item_list, targetlist=['cat','truck','automobile']):
     print "Probability table"
-    k = 0
+    k = -1
     for i in range(row):
         for j in range(col):
+            k = k + 1
             if (i*col + j) < len(item_list):
                 if item_list[k]['catagory'] in targetlist:
                     if item_list[k]['probability'] > threshold:
@@ -34,10 +39,12 @@ def print_probability_table(item_list, targetlist=['cat','truck','automobile']):
                     else:
                         print colored("|%6.6s" % item_list[k]['probability'], 'green') ,
                 else:
-                    print ("|%6.6s" % item_list[k]['probability']) ,
+                    if item_list[k]['catagory2'] in targetlist:
+                        print colored("|%6.6s" % item_list[k]['probability'], k2color) ,
+                    else:
+                        print ("|%6.6s" % item_list[k]['probability']) ,
             else:
                 print ("|%6.6s" % 'x') ,
-            k = k + 1
         print "|"
 
 def get_coordinate(index):
