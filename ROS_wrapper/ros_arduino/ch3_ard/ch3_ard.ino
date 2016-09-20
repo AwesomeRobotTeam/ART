@@ -16,10 +16,10 @@ const int stepsPerRevolution = 2048;  // change this to fit the number of steps 
 void wrtFort( const challenge3::Laser_fort &msg)
 {
    //stp1.step( msg.rotsteps1);
-   Move( abs(msg.rotstep1), msg.rotsteps > 0 ? 1 : 0, 2, 3, 4, 5);
+   Move( abs(msg.rotsteps1), msg.rotsteps1 > 0 ? 0 : 1, 2, 3, 4, 5);
    delay( 100);
    //stp2.step( msg.rotsteps2);
-   Move( abs(msg.rotstep2), msg.rotsteps > 0 ? 1 : 0, 8, 9, 10, 11);
+   Move( abs(msg.rotsteps2), msg.rotsteps2 > 0 ? 0 : 1, 8, 9, 10, 11);
    delay( 100);
    digitalWrite( lacer, msg.hit);
    if( msg.delay != 0)
