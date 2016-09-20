@@ -4,42 +4,107 @@ import cv2
 sys.path.append('/home/'+os.popen("whoami").read().strip('\n')+'/ART/ROS_wrapper/challenge3/script/module/')
 from laser import laser
 
-line_num = 5
+def method1():
+    line_num = 4
+    # laser config
+    laserfort = laser(precision=10)
+    
+    x, y = laserfort.controlLaser()
+    if (not x == 0) and (not y == 0):
+        print "[Error]The point is not at center."
+        sys.exit()
+    else:
+        if (not laserfort.X_Axis == 0) and (not laserfort.Y_Axis == 0): 
+            print "[Error]Not in the center"
+        positions = list()
+        for i in range(line_num):
+            positions.append(laserfort.calculateSteps())
+        laserfort.center()
+        raw_input("[System]Press enter to write data to file")
+        with open('steps.config', 'w') as fp:
+            for index in range(256):
+                if index >= line_num:
+                    fp.write("0 0\n")
+                else:
+                    line = "%d %d\n" % (positions[index][0], positions[index][1])
+                    fp.write(line)
+    
+    # laser test
+    laserfort.table = laserfort.readTableFile('steps.config')
+    for i in range(len(positions)):
+        laserfort.shoot1(0, i)
+    
+    # return to center and shutdown
+    laserfort.shutdown()
 
-# laser config
-laser = laser()
+def method2():
+    # this method need to calibrate 16 points
+    x, y = laserfort.controlLaser()
+    if (not x == 0) and (not y == 0):
+        print "[Error]The point is not at center."
+        sys.exit()
+    else:
+        if (not laserfort.X_Axis == 0) and (not laserfort.Y_Axis == 0): 
+            print "[Error]Not in the center"
+        positions = list()
+        datums = list()
+        for i in range(4):
+            print "[System]Calibrate the line %d points" %  i
+            for j in range(4):
+                datums.append(laserfort.calculateSteps())
+        heads = (0, 7, 8, 15)
+        for i in range(4):
+            positions.insert(heads[i]*16+0, datums[i*4+0])
+            positions.insert(heads[i]*16+7, datums[i*4+1])
+            positions.insert(heads[i]*16+8, datums[i*4+2])
+            positions.insert(heads[i]*16+15,datums[i*4+3])
+        exdatums = list()
+        for i in range(16):
+            exdatums.append(datums[0])
+            exdatums.append(datums[1])
+            exdatums.append(datums[2])
+            exdatums.append(datums[3])
+                
+    # laser test
+    #laserfort.table = laserfort.readTableFile('steps.config')
+    #for i in range(len(positions)):
+    #    laserfort.shoot1(0, i)
+    
+    # return to center and shutdown
+    #laserfort.shutdown()
 
-x, y = laser.controlLaser()
-if (not x == 0) and (not y == 0):
-    print "[Error]The point is not at center."
-    sys_exit()
-else:
-    if (not laser.X_Axis == 0) and (not laser.Y_Axis == 0): 
-        print "[Error]Not in the center"
-    positions = list()
-    for i in range(line_num):
-        positions.append(laser.calculateSteps())
-    laser.center()
-    with open('steps.config', 'w') as fp:
-        for index in range(256):
-            if index >= line_num:
-                fp.write("0 0\n")
-            else:
-                line = "%d %d\n" % (positions[index][0], positions[index][1])
-                fp.write(line)
+def method3():
+    line_num = 2
+    # laser config
+    laserfort = laser(precision=10)
+    
+    x, y = laserfort.controlLaser()
+    if (not x == 0) and (not y == 0):
+        print "[Error]The point is not at center."
+        sys.exit()
+    else:
+        if (not laserfort.X_Axis == 0) and (not laserfort.Y_Axis == 0): 
+            print "[Error]Not in the center"
+        positions = list()
+        for i in range(line_num):
+            positions.append(laserfort.calculateSteps())
+            laserfort.center()
+        raw_input("[System]Press enter to write data to file")
+        with open('steps.config', 'w') as fp:
+            for index in range(256):
+                if index >= line_num:
+                    fp.write("0 0\n")
+                else:
+                    line = "%d %d\n" % (positions[index][0], positions[index][1])
+                    fp.write(line)
+    
+    # laser test
+    laserfort.table = laserfort.readTableFile('steps.config')
+    for i in range(len(positions)):
+        laserfort.shoot1(0, i)
+    
+    # return to center and shutdown
+    laserfort.shutdown()
 
-# laser test
-laser.table = laser.readTableFile('steps.config')
-for i in range(line_num):
-    laser.shoot1(0, i)
-
-laser.center()
-print "[System]Test 4 corners"
-laser.shoot1(0, 0)
-laser.shoot1(0, 15)
-laser.shoot1(15, 0)
-laser.shoot1(15, 15)
-
-# return to center and shutdown
-laser.center()
-laser.shutdown()
+if __name__ == "__main__":
+    method3()

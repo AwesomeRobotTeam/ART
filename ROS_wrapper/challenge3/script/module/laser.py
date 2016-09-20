@@ -21,10 +21,10 @@ class laser:
         self.X_Axis = 0
         self.Y_Axis = 0
         
-        # ROS init start
+        # ROS init start #######################################
         rospy.init_node("Center_Node")
-        self.pubStepper = rospy.Publisher("Arduino_Laser_fort", Laser_fort, queue_size=10)
-        # ROS init end 
+        self.pubStepper = rospy.Publisher("Arduino_Laser_fort", Laser_fort, queue_size=1000)
+        # ROS init end #########################################
 
     # laser to center
     def controlLaser(self):
@@ -48,15 +48,18 @@ class laser:
                 self.move(0, 0, self.laser)
             elif ch == 's':
                 print '[System]Start controlling.'
+                self.setCenter()
                 break
             elif ch == 'q':
                 sys.exit()
             else:
                 continue
+        return self.X_Axis, self.Y_Axis
+    
+    def setCenter(self):
         self.X_Axis = 0
         self.Y_Axis = 0
-        return self.X_Axis, self.Y_Axis
-
+    
     def getCurrentPosition(self):
         return self.X_Axis, self.Y_Axis    
         
@@ -133,17 +136,21 @@ class laser:
 
     def center(self):
         self.move(-self.Y_Axis, -self.X_Axis, 1, 0)
+        self.X_Axis = 0
+        self.Y_Axis = 0
     
     def shutdown(self):
         self.move(0, 0, 0, 0)
 
+    # ROS ROS RSO ROS ROS ROS
     def move(self, yaw, pitch, h, t=0):
         try:
             if not rospy.is_shutdown(): 
-                self.pubStepper.publish( rotsteps1 = yaw, rotsteps2 = pitch, hit = h, delay = t)
+                self.pubStepper.publish(rotsteps1 = yaw, rotsteps2 = pitch, hit = h, delay = t)
         except rospy.ROSInterruptException: 
             pass
-    
+    # ROS ROS ROS ROS ROS ROS    
+
     def readTableFile(self, path):
         table = list()
         with open(path) as f:
