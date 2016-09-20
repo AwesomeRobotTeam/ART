@@ -31,7 +31,13 @@ def convert(patch, method):
         length = 512
         return cv2.resize(patch, (length,length))
 
-def getStretch(cap):
+def getStretch(cap, mancheck=False):
+    patch = None
+    if not mancheck:
+        for i in range(5):
+            ret, frame = cap.read()
+            patch = myFetcher.segment(frame)
+        return patch
     while True:
         ret, frame = cap.read()
         patch = myFetcher.segment(frame)
@@ -40,8 +46,13 @@ def getStretch(cap):
         if cv2.waitKey(1) & 0xFF == ord('q'):  
             return patch
 
-
-def onlySquare(cap):
+def onlySquare(cap, mancheck=False):
+    frame = None
+    if not mancheck:
+        for i in range(5):
+            ret, frame = cap.read()
+            frame = frame[:,80:560,:]
+        return frame
     while True:
         ret, frame = cap.read()
         frame = frame[:,80:560,:]
