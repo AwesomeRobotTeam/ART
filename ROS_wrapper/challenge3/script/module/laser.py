@@ -63,8 +63,8 @@ class laser:
     def getCurrentPosition(self):
         return self.X_Axis, self.Y_Axis    
         
-    def calculateSteps(self):
-        print "[System]Now you can move the laser. Press white spcae to record the point"
+    def calculateSteps(self, index=0):
+        print "[System]Press white spcae to record the point %d" % index
         return self.measure()
                
     def measure(self):
@@ -97,17 +97,22 @@ class laser:
         print "\n[System]Save point"
         return self.X_Axis, self.Y_Axis
 
-    def shoot1(self, x, y):
+    def shoot1(self, x, y, debug=False):
         # search table
         index = x * 16 + y
         print str(self.table[index]['X-Axis']) + '   ' + str(self.table[index]['Y-Axis'])
         # the process must wait for seconds until laser daley completed, otherwise the system will get error result
         self.move(self.table[index]['Y-Axis'], self.table[index]['X-Axis'], 1, 3000)
         time.sleep(4)
-        #return to the datum point
-        self.move(-self.table[index]['Y-Axis'], -self.table[index]['X-Axis'], 1, 0)
+        if debug: 
+            # return to the datum point
+            self.move(-self.table[index]['Y-Axis'], -self.table[index]['X-Axis'], 1, 0)
+        else:
+            self.move(0, 0, 0, 0)
+            # return to the datum point
+            self.move(-self.table[index]['Y-Axis'], -self.table[index]['X-Axis'], 0, 0)
 
-    def shoot2(self, x, y, datum_point_x=7, datum_point_y=7):
+    def shoot2(self, x, y, datum_point_x=7, datum_point_y=7, debug=False):
         # calculate the rotate angles
         quadrant = getQuadrant(x, y, datum_point_x, datum_point_y)
         print 'quadrant : %d' % quadrant
@@ -141,15 +146,18 @@ class laser:
     
     def shutdown(self):
         self.move(0, 0, 0, 0)
+        time.sleep(2)
 
     # ROS ROS RSO ROS ROS ROS
-    def move(self, yaw, pitch, h, t=0):
+    def move(self, yaw, pitch, h, t=0):    
         try:
             if not rospy.is_shutdown(): 
                 self.pubStepper.publish(rotsteps1 = yaw, rotsteps2 = pitch, hit = h, delay = t)
+                self.X_Axis = self.X_Axis + pitch
+                self.Y_Axis = self.Y_Axis + yaw
         except rospy.ROSInterruptException: 
             pass
-    # ROS ROS ROS ROS ROS ROS    
+    # ROS ROS ROS ROS ROS ROS
 
     def readTableFile(self, path):
         table = list()
@@ -187,7 +195,7 @@ def getQuadrant(x, y, datum_point_x, datum_point_y):
         return 4
 
 if __name__ == '__main__':
-    laser = laser()
+    laser = laser(searchTable=True)
     laser.controlLaser()
     while True:
         coordinate = raw_input().split()
@@ -195,4 +203,4 @@ if __name__ == '__main__':
             break
         else:
             print "x : %s \t y : %s" % (coordinate[0], coordinate[1])
-            laser.shoot2(int(coordinate[0]), int(coordinate[1]))
+            laser.shoot1(int(coordinate[0]), int(coordinate[1]))
