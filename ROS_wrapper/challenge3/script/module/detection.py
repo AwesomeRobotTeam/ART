@@ -3,7 +3,8 @@ from termcolor import colored
 row = 16
 col = 16
 k2color = 'blue'
-threshold = 0.90 #the probability threshold
+SelectThreshold = 0.90 #the probability threshold to select candidate
+CofusionThreshold = 0.60 #the threshold indicating need to check k2 
 
 def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
     print "Catagory table"
@@ -13,7 +14,7 @@ def print_catagory_table(item_list,targetlist=['cat','truck','automobile']):
             k = k + 1 
             if (i*col + j) < len(item_list):
                 if item_list[k]['catagory'] in targetlist:
-                    if item_list[k]['probability'] > threshold:
+                    if item_list[k]['probability'] > SelectThreshold:
                         print colored("|%6.6s" % item_list[k]['catagory'], 'red') ,
                     else:
                         print colored("|%6.6s" % item_list[k]['catagory'], 'green') ,
@@ -34,7 +35,7 @@ def print_probability_table(item_list, targetlist=['cat','truck','automobile']):
             k = k + 1
             if (i*col + j) < len(item_list):
                 if item_list[k]['catagory'] in targetlist:
-                    if item_list[k]['probability'] > threshold:
+                    if item_list[k]['probability'] > SelectThreshold:
                         print colored("|%6.6s" % item_list[k]['probability'], 'red') ,
                     else:
                         print colored("|%6.6s" % item_list[k]['probability'], 'green') ,
@@ -61,21 +62,29 @@ def get_coordinates(item_list, targetlist=['cat','truck','automobile'], num=10):
     print [coordinate for coordinate in coordinates]
     return coordinates
 
-def select_candidates(candidates, num=10):
+def select_candidates(candidates, num=10, strict=0):
     bp = None
     seeds = None
+    print len(candidates)
     # get only first 10 objects 
     if len(candidates) > num:
         candidates = candidates[:num]
+        seeds = candidates
+    else:
+        seeds = candidates
     # add threshold
+    if strict < 1:
+        return seeds
     for index in range(len(candidates)):
-        if candidates[index]['probability'] < threshold:
+        if candidates[index]['probability'] < SelectThreshold:
             seeds = candidates[:index]
             bp = index
             break
     if bp is None:
-        return candidates
+        return seeds
     # special case select
+    if strict < 2:
+        return seeds
     for candidate in candidates[bp:]:
         if candidate['catagory'] == 'cat':
             seeds.insert(0, candidate)
