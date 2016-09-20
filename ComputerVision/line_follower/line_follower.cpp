@@ -1,13 +1,11 @@
 /*
- * Preferred parameters: -v 0 -s 3 -o -100 -a 60 -t 200 -r 20
+ * Preferred parameters: -v 0 -s 3 -w 200 -h 50 -g 10 -t 20
  *
  * By Guan-Wen Lin
- * Last modified: Sep 19, 2016.
+ * Last modified: Sep 20, 2016.
  */
 
 #include <iostream>
-#include <vector>
-#include <algorithm>
 #include <unistd.h>
 
 #include <opencv2/core/core.hpp>
@@ -18,85 +16,81 @@
 #define TURN_LEFT   1
 #define TURN_RIGHT  2
 
-bool myCompFunc(cv::Vec2f a, cv::Vec2f b) {
-	return a[0] < b[0];
-}
+cv::Mat voteMovingDirection(cv::Mat segmentedInputFrame, int &votes_left, int &votes_middle, int &votes_right, cv::Size windowSize, int windowGap) {
+	cv::Point imgCenter(segmentedInputFrame.cols / 2, segmentedInputFrame.rows / 2);
+	cv::Point windowOrigin_left  (imgCenter.x - 3 * windowSize.width / 2 - windowGap, imgCenter.y - windowSize.height / 2);
+	cv::Point windowOrigin_middle(imgCenter.x -     windowSize.width / 2            , imgCenter.y - windowSize.height / 2);
+	cv::Point windowOrigin_right (imgCenter.x +     windowSize.width / 2 + windowGap, imgCenter.y - windowSize.height / 2);
 
-cv::Mat detectRoad(cv::Mat &segmentedInputFrame, int offset, int angle) {
-	// Sharpen segmentedInputFrame
-	cv::Mat blurredSegmentedInputFrame;
-	cv::GaussianBlur(segmentedInputFrame, blurredSegmentedInputFrame, cv::Size(0, 0), 3);
-	cv::addWeighted(segmentedInputFrame, 1.5, blurredSegmentedInputFrame, -0.5, 0, segmentedInputFrame);
+	cv::Rect window_left  (windowOrigin_left  , windowSize);
+	cv::Rect window_middle(windowOrigin_middle, windowSize);
+	cv::Rect window_right (windowOrigin_right , windowSize);
+
+	cv::Point center_left(0, 0), center_middle(0, 0), center_right(0, 0);
+	int ptCount_left = 0, ptCount_middle = 0, ptCount_right = 0;
 
 	cv::Mat edges;
-	cv::Canny(segmentedInputFrame, edges, 30, 150, 3);
+	cv::Canny(segmentedInputFrame, edges, 50, 200);
 
-	std::vector<cv::Vec2f> lines;
-	cv::HoughLines(edges, lines, 1, 3 * CV_PI / 180, 80, 0, 0);
-
-	// Sort lines by rho in ascending order
-	std::sort(lines.begin(), lines.end(), myCompFunc);
-
-	cv::Mat road = cv::Mat::zeros(edges.size(), edges.type());
-	for (size_t i = 0; i < lines.size(); i++) {
-		// Lines are reserved if they are far from each other and not horizontal
-		if (i > 0 && (lines[i][0] - lines[i - 1][0]) < offset)
-			continue;
-		if (lines[i][1] > angle * CV_PI / 180 && lines[i][1] < (180 - angle) * CV_PI / 180) // 0 or 180 ~ vertical line, CV_PI/2 ~ horizontal line
-			continue;
-
-		float rho = lines[i][0], theta = lines[i][1];
-		double a = cos(theta), b = sin(theta);
-		double x0 = a * rho, y0 = b * rho;
-		cv::Point pt1(cvRound(x0 + 1000 * (-b)), cvRound(y0 + 1000 * a));
-		cv::Point pt2(cvRound(x0 - 1000 * (-b)), cvRound(y0 - 1000 * a));
-		cv::line(road, pt1, pt2, cv::Scalar(51), 1, CV_AA);
-	}
-
-	return road;
-}
-
-int computeCenter(cv::Mat road) {
-	int center = 0;
-
-	int whitePtCount = 0;
-	for (int i = 0; i < road.rows; i++) {
-		for (int j = 0; j < road.cols; j++) {
-			if (road.at<uchar>(i, j) > 0) {
-				center += j;
-				whitePtCount++;
+	for (int i = 0; i < edges.cols; i++) {
+		for (int j = windowOrigin_left.y; j < windowOrigin_left.y + windowSize.height; j++) {
+			if (edges.at<uchar>(j, i) > 0) {
+				cv::Point pt(i, j);
+				if (window_left.contains(pt)) {
+					center_left += pt;
+					ptCount_left++;
+				}
+				else if (window_middle.contains(pt)) {
+					center_middle += pt;
+					ptCount_middle++;
+				}
+				else if (window_right.contains(pt)) {
+					center_right += pt;
+					ptCount_right++;
+				}
 			}
 		}
 	}
-	if (whitePtCount > 0)
-		center /= whitePtCount;
 
-	return center;
+	center_left   = ptCount_left   > 0 ? cv::Point(center_left.x   / ptCount_left  , center_left.y   / ptCount_left)   : cv::Point(0, 0);
+	center_middle = ptCount_middle > 0 ? cv::Point(center_middle.x / ptCount_middle, center_middle.y / ptCount_middle) : cv::Point(0, 0);
+	center_right  = ptCount_right  > 0 ? cv::Point(center_right.x  / ptCount_right , center_right.y  / ptCount_right)  : cv::Point(0, 0);
+
+	votes_left   = window_left.contains(center_left)     ? votes_left   + 1 : votes_left   + 0;
+	votes_middle = window_middle.contains(center_middle) ? votes_middle + 1 : votes_middle + 0;
+	votes_right  = window_right.contains(center_right)   ? votes_right  + 1 : votes_right  + 0;
+
+	cv::rectangle(edges, window_left  , cv::Scalar(255));
+	cv::rectangle(edges, window_middle, cv::Scalar(255));
+	cv::rectangle(edges, window_right , cv::Scalar(255));
+
+	return edges;
 }
 
-int computeMovingDirection(int imgCenter, int &preCenter, int &curCenter, int movingDirection, int threshold, int resolution) {
-	// If the center is undetected or there are some noises, keep the moving direction
-	if (curCenter == 0)
-		return movingDirection;
-	if (abs(curCenter - preCenter) > threshold)
-		return movingDirection;
+int computeMovingDirection(int preMovingDirection, int &votes_left, int &votes_middle, int &votes_right, int votingThreshold) {
+	int curMovingDirection;
 
-	if (curCenter - imgCenter > resolution) {
-		preCenter = curCenter;
-		return TURN_RIGHT;
+	if (votes_left > votingThreshold || votes_middle > votingThreshold || votes_right > votingThreshold) {
+		if (votes_left > votingThreshold)
+			curMovingDirection = TURN_LEFT;
+		else if (votes_middle > votingThreshold)
+			curMovingDirection = GO_STRAIGHT;
+		else if (votes_right > votingThreshold)
+			curMovingDirection = TURN_RIGHT;
+
+		votes_left = votes_middle = votes_right = 0;
 	}
-	if (imgCenter - curCenter > resolution) {
-		preCenter = curCenter;
-		return TURN_LEFT;
-	}
-	return GO_STRAIGHT;
+	else
+		curMovingDirection = preMovingDirection;
+
+	return curMovingDirection;
 }
 
 int main(int argc, char *argv[]) {
 	// Check command arguments
 	int c;
-	int DEVICE, SEGMENTATION_RATIO, OFFSET, ANGLE, THRESHOLD, RESOLUTION;
-	while ((c = getopt(argc, argv, "v:s:o:a:t:r:")) != -1) {
+	int DEVICE, SEGMENTATION_RATIO, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_GAP, VOTING_THRESHOLD;
+	while ((c = getopt(argc, argv, "v:s:w:h:g:t:")) != -1) {
 		switch (c) {
 			case 'v':
 				DEVICE = atoi(optarg);
@@ -104,25 +98,25 @@ int main(int argc, char *argv[]) {
 			case 's':
 				SEGMENTATION_RATIO = atoi(optarg);
 				break;
-			case 'o':
-				OFFSET = atoi(optarg);
+			case 'w':
+				WINDOW_WIDTH = atoi(optarg);
 				break;
-			case 'a':
-				ANGLE = atoi(optarg);
+			case 'h':
+				WINDOW_HEIGHT = atoi(optarg);
+				break;
+			case 'g':
+				WINDOW_GAP = atoi(optarg);
 				break;
 			case 't':
-				THRESHOLD = atoi(optarg);
-				break;
-			case 'r':
-				RESOLUTION = atoi(optarg);
+				VOTING_THRESHOLD = atoi(optarg);
 				break;
 			default: // '?'
-				std::cout << "Usage: " << argv[0] << " [-v device] [-s segmentation_ratio] [-o offset] [-a angle] [-t threshold] [-r resolution]" << std::endl;
+				std::cout << "Usage: " << argv[0] << " [-v device] [-s segmentation_ratio] [-w window_width] [-h window_height] [-g window_gap] [-t voting_threshold]" << std::endl;
 				return -1;
 		}
 	}
 	if (argc != 13) {
-		std::cout << "Usage: " << argv[0] << " [-v device] [-s segmentation_ratio] [-o offset] [-a angle] [-t threshold] [-r resolution]" << std::endl;
+		std::cout << "Usage: " << argv[0] << " [-v device] [-s segmentation_ratio] [-w window_width] [-h window_height] [-g window_gap] [-t voting_threshold]" << std::endl;
 		return -1;
 	}
 
@@ -133,14 +127,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	cv::namedWindow("Video Captured");
-	cv::namedWindow("Road Detected");
+	cv::namedWindow("Voting Result");
 
-	int inputFrameCount = 0;
-	cv::Mat avgRoad;
-
-	int imgCenter = myVideoCapture.get(CV_CAP_PROP_FRAME_WIDTH) / 2;
-	int preCenter = imgCenter;
+	int votes_left = 0, votes_right = 0, votes_middle = 0;
 	int movingDirection = GO_STRAIGHT;
+
 	while (1) {
 		int key = cv::waitKey(1);
 		if ((key & 0xFF) == 27) // 'Esc' key
@@ -148,30 +139,15 @@ int main(int argc, char *argv[]) {
 
 		cv::Mat inputFrame, segmentedInputFrame;
 		myVideoCapture >> inputFrame;
-		inputFrame(cv::Range(inputFrame.rows - inputFrame.rows / SEGMENTATION_RATIO, inputFrame.rows - 1), cv::Range::all()).copyTo(segmentedInputFrame);
+		inputFrame(cv::Range(inputFrame.rows - inputFrame.rows / SEGMENTATION_RATIO, inputFrame.rows), cv::Range::all()).copyTo(segmentedInputFrame);
 
-		// Detect road. In general, there are only vertical lines
-		cv::Mat road = detectRoad(segmentedInputFrame, OFFSET, ANGLE);
+		cv::Mat edges = voteMovingDirection(segmentedInputFrame, votes_left, votes_right, votes_middle, cv::Size(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_GAP);
 
-		if (inputFrameCount == 0)
-			road.copyTo(avgRoad);
-		else
-			avgRoad += road;
-		if ((++inputFrameCount) < 5)
-			continue;
-		else
-			inputFrameCount = 0;
-
-		// Compute the road center
-		int curCenter = computeCenter(avgRoad);
-		cv::circle(avgRoad, cv::Point(curCenter, segmentedInputFrame.rows / 2), 3, cv::Scalar(255), -1);
-
-		// Compute the moving direction
-		movingDirection = computeMovingDirection(imgCenter, preCenter, curCenter, movingDirection, THRESHOLD, RESOLUTION);
+		movingDirection = computeMovingDirection(movingDirection, votes_left, votes_middle, votes_right, VOTING_THRESHOLD);
 		std::cout << movingDirection << std::endl;
 
 		cv::imshow("Video Captured", segmentedInputFrame);
-		cv::imshow("Road Detected", avgRoad);
+		cv::imshow("Voting Result", edges);
 	}
 
 	return 0;
