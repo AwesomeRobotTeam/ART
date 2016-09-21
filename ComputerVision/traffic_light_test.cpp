@@ -161,11 +161,14 @@ int main(int argc, char *argv[]) {
 		}
 		else {
 			std::cout << "Go" << std::endl;
+<<<<<<< HEAD
 			/*ROS*/
 			traf.color = GREEN;
 			/**/
 
 
+=======
+>>>>>>> 6660b23fa2a0885e55cae07488180d36cbcd4016
 			hasDetectedRedHue = false;
 			prevCenter = cv::Point(-1, -1);
 		}
