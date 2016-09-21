@@ -66,9 +66,9 @@ def method2():
             exdatums.append(datums[3])
                 
 def method3():
-    line_num = 4
+    line_num = 10
     # laser config
-    laserfort = laser(precision=10)
+    laserfort = laser(precision=2)
     
     x, y = laserfort.controlLaser()
     if (not x == 0) and (not y == 0):
@@ -93,7 +93,7 @@ def method3():
     # laser test
     laserfort.table = laserfort.readTableFile('steps.config')
     for i in range(len(positions)):
-        laserfort.shoot1((i/16), (i%16))
+        laserfort.shoot1((i/16), (i%16),debug=True)
     
     # return to center and shutdown
     laserfort.shutdown()
@@ -126,6 +126,7 @@ def method5():
             print "x : %s \t y : %s" % (coordinate[0], coordinate[1])
             laserfort.move(int(coordinate[1]), int(coordinate[0]), 1, 3000)
             laserfort.center()
+    laserfort.shutdown()
  
 if __name__ == "__main__":
     if len(sys.argv) > 2:

@@ -51,6 +51,7 @@ class laser:
                 self.setCenter()
                 break
             elif ch == 'q':
+		self.shutdown()
                 sys.exit()
             else:
                 continue
@@ -76,19 +77,18 @@ class laser:
                 ch = getchar()
                 if ch == 'A':
                     self.move(0, self.precision, 1)
-                    self.X_Axis = self.X_Axis + self.precision                    
                 elif ch == 'B':
                     self.move(0, -self.precision, 1)
-                    self.X_Axis = self.X_Axis - self.precision
                 elif ch == 'C':
                     self.move(self.precision, 0, 1)
-                    self.Y_Axis = self.Y_Axis + self.precision
                 elif ch == 'D':
                     self.move(-self.precision, 0, 1)
-                    self.Y_Axis = self.Y_Axis - self.precision
             elif ch == ' ':
                 break
+	    elif ch == 's':
+		self.setCenter()
             elif ch == 'q':
+		self.shutdown()
                 sys.exit()
             else:
                 continue
