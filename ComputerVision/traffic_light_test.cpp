@@ -1,7 +1,10 @@
 /*
+ * Preferred parameters: -v 0 -s 3 -r 300 -d 100 -l 2
+ *
  * By Guan-Wen Lin
- * Last modified: Sep 2, 2016.
+ * Last modified: Sep 21, 2016.
  */
+
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -57,12 +60,15 @@ bool findBiggestRedHue(const cv::Mat &redHueImg, const int threshold_red, cv::Po
 int main(int argc, char *argv[]) {
 	// Check command arguments
 	int c;
-	int DEVICE, THRESHOLD_RED, THRESHOLD_DISTANCE;
+	int DEVICE, SEGMENTATION_RATIO, THRESHOLD_RED, THRESHOLD_DISTANCE;
 	double LATENCY;
-	while ((c = getopt(argc, argv, "v:r:d:s:")) != -1) {
+	while ((c = getopt(argc, argv, "v:s:r:d:l:")) != -1) {
 		switch (c) {
 			case 'v':
 				DEVICE = atoi(optarg);
+				break;
+			case 's':
+				SEGMENTATION_RATIO = atoi(optarg);
 				break;
 			case 'r':
 				THRESHOLD_RED = atoi(optarg);
@@ -70,16 +76,16 @@ int main(int argc, char *argv[]) {
 			case 'd':
 				THRESHOLD_DISTANCE = atoi(optarg);
 				break;
-			case 's':
+			case 'l':
 				LATENCY = atof(optarg);
 				break;
 			default: // '?'
-				std::cout << "Usage: " << argv[0] << " [-v device] [-r threshold_red] [-d threshold_distance] [-s latency]" << std::endl;
+				std::cout << "Usage: " << argv[0] << " [-v device] [-s segmentation_ratio] [-r threshold_red] [-d threshold_distance] [-l latency]" << std::endl;
 				return -1;
 		}
 	}
-	if (argc != 9) {
-		std::cout << "Usage: " << argv[0] << " [-v device] [-r threshold_red] [-d threshold_distance] [-s latency]" << std::endl;
+	if (argc != 11) {
+		std::cout << "Usage: " << argv[0] << " [-v device] [-s segmentation_ratio] [-r threshold_red] [-d threshold_distance] [-l latency]" << std::endl;
 		return -1;
 	}
 
@@ -102,9 +108,10 @@ int main(int argc, char *argv[]) {
 		if ((key & 0xFF) == 27) // 'Esc' key
 			return 0;
 
-		cv::Mat inputFrame_BGR;
+		cv::Mat inputFrame_BGR, segmentedInputFrame_BGR;
 		myVideoCapture >> inputFrame_BGR;
-		cv::Mat redHueImg = extractRedHue(inputFrame_BGR);
+		inputFrame_BGR(cv::Range(0, inputFrame_BGR.rows / SEGMENTATION_RATIO), cv::Range::all()).copyTo(segmentedInputFrame_BGR);
+		cv::Mat redHueImg = extractRedHue(segmentedInputFrame_BGR);
 
 		cv::Point curCenter;
 		if (findBiggestRedHue(redHueImg, THRESHOLD_RED, curCenter)) {
@@ -125,10 +132,13 @@ int main(int argc, char *argv[]) {
 			else
 				std::cout << "Wait" << std::endl;
 		}
-		else
+		else {
 			std::cout << "Go" << std::endl;
+			hasDetectedRedHue = false;
+			prevCenter = cv::Point(-1, -1);
+		}
 
-		cv::imshow("Video Captured", inputFrame_BGR);
+		cv::imshow("Video Captured", segmentedInputFrame_BGR);
 		cv::imshow("Red Hue", redHueImg);
 	}
 

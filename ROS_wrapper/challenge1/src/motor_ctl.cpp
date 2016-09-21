@@ -60,12 +60,12 @@ void optMotor( challenge1::Motor &mot, toward t)
 		case( stop):
 			wrtMotor( mot, 0, 0, 0, 0);
 			break;
-		/*case( right2):
-			wrtMotor( mot, high , 0, 0, 0);
+		case( right2):
+			wrtMotor( mot, low, 0, high * SP_TOR, 0);
 			break;
 		case( left2):
-			wrtMotor( mot, 0, 0, high * SP_TOR, 0);
-			break;*/
+			wrtMotor( mot, high , 0, low * SP_TOR, 0);
+			break;
 		default:
 			break;
 	}

@@ -46,4 +46,12 @@ zero_arm( challenge2_1::Arm &msg)
 	msg.baseSteps = (msg.lowerSteps = (msg.upperSteps = 0));
 }
 
+inline void
+arm_zero( challenge2_1::Arm &msg)
+{
+	msg.baseSteps = -obj[BASE].cur_motor.stepper_now;
+	msg.lowerSteps = obj[ LOW].cur_motor.stepper_now;
+	msg.upperSteps = obj[ UP].cur_motor.stepper_now;
+	msg.wristAngle = 0;
+}
 #endif
