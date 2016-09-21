@@ -1,8 +1,8 @@
 #include "challenge1/Motor.h"
 #include "_time.h"
 
-#define HIGH_SP 120
-#define LOW_SP  50
+#define HIGH_SP 50//120
+#define LOW_SP  30//50
 
 #define SPTIME	 2
 #define SPEEDUP1 60
