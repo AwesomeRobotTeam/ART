@@ -92,10 +92,10 @@ void rddirect( const challenge1::Road::ConstPtr &msg)
 			optMotor( mot, front0);
 			break;
 		case( 1):
-			optMotor( mot, right0);
+			optMotor( mot, right2);
 			break;
 		case( 2):
-			optMotor( mot, left0);
+			optMotor( mot, left2);
 			break;
 		default:
 			break;
@@ -144,9 +144,9 @@ void btracker( const challenge1::IR_trigger::ConstPtr &msg)
 	else if( ( int) msg->trig_rr == 1)
 		optMotor( mot, left1);
 	else if( ( int) msg->trig_l == 1)
-		optMotor( mot, right0);
+		optMotor( mot, front0);
 	else if( ( int) msg->trig_r == 1)
-		optMotor( mot, left0);
+		optMotor( mot, front0);
 	else if( ( int) msg->trig_c == 1)
 		optMotor( mot, front0);
 	/*avoid to be out of boundary*/
