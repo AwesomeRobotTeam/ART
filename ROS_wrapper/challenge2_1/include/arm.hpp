@@ -40,4 +40,7 @@ bend2rad( double x, double y, double a, double b);
 double*
 coord2armrad( double x, double y , double z, double a, double b, double c);
 
+double*
+coord2realarm( double x, double y , double z, double a, double b, double c);
+
 #endif

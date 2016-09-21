@@ -7,6 +7,12 @@
 #include "challenge2_1/Arm.h"
 #include "challenge2_1/Ultrasonic.h"
 
+#define MANUAL 'm'
+#define ROTATE 'r'
+#define ZERO	 'z'
+
+#define ngetc( c) ( read ( 0, ( c), 1))
+
 ///< ROS init Topic msg
 challenge2_1::Ultrasonic usonic;
 challenge2_1::Arm arm;
@@ -17,6 +23,9 @@ void closeArot( const challenge2_1::Ultrasonic::ConstPtr &msg);
 
 ///< TODO: not measurement
 double locate[3] = { 30, 0, 0};
+
+void retKey( void);
+char* const key = ( char*) malloc( sizeof( char));
 
 int
 main( int argc, char** argv)
@@ -33,9 +42,30 @@ main( int argc, char** argv)
 	r_newSub( usonicsub, hdl, Arduino_Ultrasonic, 1000, closeArot);
 
 
+	//manul_assign( arm);
+
 	while( ros::ok())
 	{
-		manul_assign( arm);
+
+	char tmpc = 'r';
+
+	retKey();
+	tmpc = *key;
+
+	switch( tmpc){
+		case( MANUAL):
+			manul_assign( arm);
+			break;
+		/*case( ROTATE):
+			closeArot( usonic);
+			break;*/
+		case( ZERO):
+			arm_zero( arm);
+			break;
+		default:
+			break;
+		}
+	
 		armpub.publish( arm);
 
 		ros::spinOnce();
@@ -54,10 +84,13 @@ manul_assign( challenge2_1::Arm &msg)
 	double* rad = coord2armrad( tmp[0], tmp[1], tmp[2], LOWER_L, UPPER_L, WRIST_L);
 	printf("main rad x = %lf, y = %lf, z = %lf\n", rad2ang( rad[0]), rad2ang( rad[1]), rad2ang( rad[2]));
 
-	arm_ctl( msg, tmp[0] + UPPER_W - WRIST_W , tmp[1] - WRIST_L, tmp[2]);// + WRIST_H);
+	//arm_ctl( msg, tmp[0] + UPPER_W - WRIST_W , tmp[1] - WRIST_L, tmp[2]);// + WRIST_H);
+
+	///< test for manual
+	arm_ctl( msg, tmp[0], tmp[1], tmp[2]);
 
 	///< assign location
-	for( int j = 0; j < 4; j++)
+	for( int j = 0; j < 3; j++)
 		locate[ j] = tmp[ j];
 	
 	//Real
@@ -87,4 +120,19 @@ closeArot( const challenge2_1::Ultrasonic::ConstPtr &msg)
 		zero_arm( arm);
 		arm_clip_rot( arm, 0);//because the servo is begin at -90
 	}
+}
+
+void retKey( void)
+{
+	memset( key, '\0', 1);
+
+	ssize_t size;
+
+	if( (size = ngetc( key)) < 0 || *key == '\n'){
+		ROS_DEBUG("Nothing key input\n");
+		retKey();
+	}
+
+	ROS_DEBUG("key = %c, size = %zd", *key, size);
+	//return true;
 }

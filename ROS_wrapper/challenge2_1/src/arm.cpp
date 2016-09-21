@@ -1,6 +1,10 @@
 #include "arm.hpp"
 #include "rad_trf.hpp"
 
+#define WRIST_H			 3.872//2.334 3.872
+#define WRIST_W			 3.2  //3.872 3.2
+#define WRIST_L			 4.2  //2.597 4.2
+
 /**
  *		^ +z
  *		|
@@ -48,4 +52,9 @@ coord2armrad( double x, double y , double z, double a, double b, double c)
 	free( tmp);
 
 	return ret;
+}
+
+double* coord2realarm( double x, double y , double z, double a, double b, double c)
+{
+	return coord2armrad( x - WRIST_L, y - WRIST_W, z -WRIST_H, a, b, c);
 }

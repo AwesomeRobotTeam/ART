@@ -20,9 +20,10 @@
 const byte EN[3] = {8, 43, 49};
 const byte DIR[3] = {9, 45, 51};
 const byte CLK[3] = {10, 47, 53};
-#define Wrist 6
+
+#define Wrist 13
 Servo wrist;
-#define Clip 7
+#define Clip 12
 Servo clip;
 
 //
@@ -99,14 +100,14 @@ void StepperControl(int a, boolean b, int c)
 //Notice  (+) = clockwise, (-) = anti-clockwise 
 void wrtArm( const challenge2_1::Arm &msg)
 {
-  StepperControl( abs( - msg.baseSteps), - msg.baseSteps >  0, Base);
-  //Due to the 
   StepperControl( abs( msg.lowerSteps), msg.lowerSteps >  0, Lower);
   StepperControl( abs( msg.upperSteps),msg.upperSteps >  0, Upper);
-  clip.write( msg.wristAngle);
-  //delay(500);
+  StepperControl( abs( - msg.baseSteps), - msg.baseSteps >  0, Base);
+  //Due to the 
+  wrist.write( msg.wristAngle);
+  delay(500);
   clip.write( msg.clipAngle);
-  //delay(500);
+  delay(500);
 }
 
 //ROS Init varible
